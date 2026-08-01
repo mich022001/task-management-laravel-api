@@ -2,22 +2,37 @@
 
 namespace Database\Factories;
 
+use App\Models\Task;
+use App\Models\TaskStatusHistory;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TaskStatusHistory>
+ * @extends Factory<TaskStatusHistory>
  */
 class TaskStatusHistoryFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = TaskStatusHistory::class;
+
     public function definition(): array
     {
+        $statuses = [
+            'pending',
+            'in_progress',
+            'completed',
+            'cancelled',
+        ];
+
+        $previous = fake()->randomElement($statuses);
+        $next = fake()->randomElement(
+            array_values(array_diff($statuses, [$previous]))
+        );
+
         return [
-            //
+            'task_id' => Task::factory(),
+            'previous_status' => $previous,
+            'new_status' => $next,
+            'changed_by' => User::factory()->manager(),
         ];
     }
 }
