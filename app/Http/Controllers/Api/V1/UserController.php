@@ -24,9 +24,43 @@ class UserController extends Controller
 
         $query = User::query();
 
-        // Managers can only manage Team Member accounts.
+        // Managers may only list Team Members belonging to teams
+        // they own or lead.
         if ($currentUser->role === 'manager') {
-            $query->where('role', 'team_member');
+            $query
+                ->where('role', 'team_member')
+                ->whereHas('teams', function ($teamQuery) use ($currentUser) {
+                    $teamQuery->where(function ($managedTeamQuery) use (
+                        $currentUser,
+                    ) {
+                        $managedTeamQuery
+                            ->where(
+                                'teams.created_by',
+                                $currentUser->id,
+                            )
+                            ->orWhereExists(function ($membershipQuery) use (
+                                $currentUser,
+                            ) {
+                                $membershipQuery
+                                    ->selectRaw('1')
+                                    ->from(
+                                        'team_members as manager_memberships',
+                                    )
+                                    ->whereColumn(
+                                        'manager_memberships.team_id',
+                                        'teams.id',
+                                    )
+                                    ->where(
+                                        'manager_memberships.user_id',
+                                        $currentUser->id,
+                                    )
+                                    ->where(
+                                        'manager_memberships.member_role',
+                                        'lead',
+                                    );
+                            });
+                    });
+                });
         }
 
         $query

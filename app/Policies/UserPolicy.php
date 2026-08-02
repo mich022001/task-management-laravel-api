@@ -6,9 +6,6 @@ use App\Models\User;
 
 class UserPolicy
 {
-    /**
-     * Admins and managers may access the user-management list.
-     */
     public function viewAny(User $user): bool
     {
         return in_array($user->role, [
@@ -17,11 +14,6 @@ class UserPolicy
         ], true);
     }
 
-    /**
-     * Admins may view any user.
-     * Managers may view only Team Members.
-     * Users may view their own profile.
-     */
     public function view(User $user, User $model): bool
     {
         if ($user->id === $model->id) {
@@ -32,14 +24,9 @@ class UserPolicy
             return true;
         }
 
-        return $user->role === 'manager'
-            && $model->role === 'team_member';
+        return $this->managerCanManageMember($user, $model);
     }
 
-    /**
-     * Admins and managers may create users.
-     * The request validation will restrict managers to Team Members.
-     */
     public function create(User $user): bool
     {
         return in_array($user->role, [
@@ -48,56 +35,75 @@ class UserPolicy
         ], true);
     }
 
-    /**
-     * Admins may update any user.
-     * Managers may update Team Members only.
-     */
     public function update(User $user, User $model): bool
     {
         if ($user->role === 'admin') {
             return true;
         }
 
-        return $user->role === 'manager'
-            && $model->role === 'team_member';
+        return $this->managerCanManageMember($user, $model);
     }
 
-    /**
-     * User deletion is not supported.
-     * Accounts are deactivated instead.
-     */
     public function delete(User $user, User $model): bool
     {
         return false;
     }
 
-    /**
-     * Admins may update active/inactive status.
-     * Managers may update Team Members only.
-     */
     public function updateStatus(User $user, User $model): bool
     {
         if ($user->role === 'admin') {
             return true;
         }
 
-        return $user->role === 'manager'
-            && $model->role === 'team_member';
+        return $this->managerCanManageMember($user, $model);
     }
 
-    /**
-     * Restoring deleted users is not exposed by the API.
-     */
     public function restore(User $user, User $model): bool
     {
         return false;
     }
 
-    /**
-     * Permanent deletion is never allowed.
-     */
     public function forceDelete(User $user, User $model): bool
     {
         return false;
+    }
+
+    private function managerCanManageMember(
+        User $manager,
+        User $member,
+    ): bool {
+        if (
+            $manager->role !== 'manager'
+            || $member->role !== 'team_member'
+        ) {
+            return false;
+        }
+
+        return $member
+            ->teams()
+            ->where(function ($query) use ($manager) {
+                $query
+                    ->where('teams.created_by', $manager->id)
+                    ->orWhereExists(function ($membershipQuery) use (
+                        $manager,
+                    ) {
+                        $membershipQuery
+                            ->selectRaw('1')
+                            ->from('team_members as manager_memberships')
+                            ->whereColumn(
+                                'manager_memberships.team_id',
+                                'teams.id',
+                            )
+                            ->where(
+                                'manager_memberships.user_id',
+                                $manager->id,
+                            )
+                            ->where(
+                                'manager_memberships.member_role',
+                                'lead',
+                            );
+                    });
+            })
+            ->exists();
     }
 }

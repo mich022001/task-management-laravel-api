@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Users;
 
+use App\Models\Team;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -108,8 +109,16 @@ class UserManagementTest extends TestCase
             'email' => 'another.admin@example.com',
         ]);
 
-        User::factory()->teamMember()->create([
+        $visibleMember = User::factory()->teamMember()->create([
             'email' => 'visible.member@example.com',
+        ]);
+
+        $managedTeam = Team::factory()->create([
+            'created_by' => $manager->id,
+        ]);
+
+        $managedTeam->members()->attach($visibleMember->id, [
+            'member_role' => 'member',
         ]);
 
         $response = $this
@@ -195,5 +204,142 @@ class UserManagementTest extends TestCase
             'email' => 'default.active@example.com',
             'is_active' => true,
         ]);
+    }
+
+    public function test_manager_only_lists_members_from_teams_they_manage(): void
+    {
+        $manager = User::factory()->manager()->create();
+
+        $managedMember = User::factory()->teamMember()->create([
+            'email' => 'managed.member@example.com',
+        ]);
+
+        $unrelatedMember = User::factory()->teamMember()->create([
+            'email' => 'unrelated.member@example.com',
+        ]);
+
+        $managedTeam = Team::factory()->create([
+            'created_by' => $manager->id,
+        ]);
+
+        $managedTeam->members()->attach($managedMember->id, [
+            'member_role' => 'member',
+        ]);
+
+        $response = $this
+            ->actingAs($manager, 'api')
+            ->getJson('/api/v1/users');
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment([
+                'email' => 'managed.member@example.com',
+            ])
+            ->assertJsonMissing([
+                'email' => 'unrelated.member@example.com',
+            ]);
+    }
+
+    public function test_manager_can_view_member_from_managed_team(): void
+    {
+        $manager = User::factory()->manager()->create();
+        $member = User::factory()->teamMember()->create();
+
+        $team = Team::factory()->create([
+            'created_by' => $manager->id,
+        ]);
+
+        $team->members()->attach($member->id, [
+            'member_role' => 'member',
+        ]);
+
+        $this
+            ->actingAs($manager, 'api')
+            ->getJson("/api/v1/users/{$member->id}")
+            ->assertOk();
+    }
+
+    public function test_manager_cannot_view_unrelated_member(): void
+    {
+        $manager = User::factory()->manager()->create();
+        $member = User::factory()->teamMember()->create();
+
+        $this
+            ->actingAs($manager, 'api')
+            ->getJson("/api/v1/users/{$member->id}")
+            ->assertForbidden();
+    }
+
+    public function test_manager_cannot_update_unrelated_member(): void
+    {
+        $manager = User::factory()->manager()->create();
+
+        $member = User::factory()->teamMember()->create([
+            'name' => 'Original Member',
+        ]);
+
+        $this
+            ->actingAs($manager, 'api')
+            ->patchJson("/api/v1/users/{$member->id}", [
+                'name' => 'Unauthorized Update',
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $member->id,
+            'name' => 'Original Member',
+        ]);
+    }
+
+    public function test_manager_cannot_change_unrelated_member_status(): void
+    {
+        $manager = User::factory()->manager()->create();
+
+        $member = User::factory()->teamMember()->create([
+            'is_active' => true,
+        ]);
+
+        $this
+            ->actingAs($manager, 'api')
+            ->patchJson("/api/v1/users/{$member->id}/status", [
+                'is_active' => false,
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $member->id,
+            'is_active' => true,
+        ]);
+    }
+
+    public function test_team_lead_manager_can_manage_team_member(): void
+    {
+        $teamOwner = User::factory()->manager()->create();
+        $teamLead = User::factory()->manager()->create();
+        $member = User::factory()->teamMember()->create();
+
+        $team = Team::factory()->create([
+            'created_by' => $teamOwner->id,
+        ]);
+
+        $team->members()->attach([
+            $teamLead->id => [
+                'member_role' => 'lead',
+            ],
+            $member->id => [
+                'member_role' => 'member',
+            ],
+        ]);
+
+        $this
+            ->actingAs($teamLead, 'api')
+            ->patchJson("/api/v1/users/{$member->id}", [
+                'name' => 'Lead Updated Member',
+            ])
+            ->assertOk()
+            ->assertJsonPath(
+                'data.user.name',
+                'Lead Updated Member',
+            );
     }
 }
