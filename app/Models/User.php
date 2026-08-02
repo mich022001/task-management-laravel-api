@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasFactory;
     use Notifiable;
@@ -28,6 +29,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
@@ -37,11 +43,17 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Teams created by the user.
+     */
     public function createdTeams(): HasMany
     {
         return $this->hasMany(Team::class, 'created_by');
     }
 
+    /**
+     * Teams the user belongs to.
+     */
     public function teams(): BelongsToMany
     {
         return $this->belongsToMany(Team::class, 'team_members')
@@ -49,18 +61,45 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    /**
+     * Tasks created by the user.
+     */
     public function createdTasks(): HasMany
     {
         return $this->hasMany(Task::class, 'created_by');
     }
 
+    /**
+     * Tasks assigned to the user.
+     */
     public function assignedTasks(): HasMany
     {
         return $this->hasMany(Task::class, 'assigned_to');
     }
 
+    /**
+     * Task status history records created by the user.
+     */
     public function taskStatusHistories(): HasMany
     {
         return $this->hasMany(TaskStatusHistory::class, 'changed_by');
+    }
+
+    /**
+     * Get the identifier stored in the JWT subject claim.
+     */
+    public function getJWTIdentifier(): mixed
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return custom JWT claims.
+     *
+     * @return array<string, mixed>
+     */
+    public function getJWTCustomClaims(): array
+    {
+        return [];
     }
 }
