@@ -59,16 +59,87 @@ class TaskPolicyTest extends TestCase
         $this->assertFalse($member->can('view', $task));
     }
 
-    public function test_only_admin_or_task_creator_can_delete_task(): void
+    public function test_authorized_task_creator_can_delete_task(): void
     {
         $creator = User::factory()->manager()->create();
-        $otherManager = User::factory()->manager()->create();
+
+        $team = Team::factory()->create([
+            'created_by' => $creator->id,
+        ]);
 
         $task = Task::factory()->create([
+            'team_id' => $team->id,
             'created_by' => $creator->id,
         ]);
 
         $this->assertTrue($creator->can('delete', $task));
+    }
+
+    public function test_unauthorized_manager_cannot_delete_task(): void
+    {
+        $creator = User::factory()->manager()->create();
+        $otherManager = User::factory()->manager()->create();
+
+        $team = Team::factory()->create([
+            'created_by' => $creator->id,
+        ]);
+
+        $task = Task::factory()->create([
+            'team_id' => $team->id,
+            'created_by' => $creator->id,
+        ]);
+
         $this->assertFalse($otherManager->can('delete', $task));
+    }
+
+    public function test_admin_can_delete_any_task(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $manager = User::factory()->manager()->create();
+
+        $team = Team::factory()->create([
+            'created_by' => $manager->id,
+        ]);
+
+        $task = Task::factory()->create([
+            'team_id' => $team->id,
+            'created_by' => $manager->id,
+        ]);
+
+        $this->assertTrue($admin->can('delete', $task));
+    }
+
+    public function test_team_member_cannot_edit_assigned_task_fields(): void
+    {
+        $member = User::factory()->teamMember()->create();
+
+        $task = Task::factory()->create([
+            'assigned_to' => $member->id,
+        ]);
+
+        $this->assertFalse($member->can('update', $task));
+    }
+
+    public function test_team_member_can_change_status_of_assigned_task(): void
+    {
+        $member = User::factory()->teamMember()->create();
+
+        $task = Task::factory()->create([
+            'assigned_to' => $member->id,
+        ]);
+
+        $this->assertTrue($member->can('changeStatus', $task));
+    }
+
+    public function test_team_member_cannot_change_status_of_unassigned_task(): void
+    {
+        $member = User::factory()->teamMember()->create();
+        $otherMember = User::factory()->teamMember()->create();
+
+        $task = Task::factory()->create([
+            'assigned_to' => $otherMember->id,
+        ]);
+
+        $this->assertFalse($member->can('changeStatus', $task));
     }
 }
