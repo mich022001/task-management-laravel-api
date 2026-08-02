@@ -52,4 +52,14 @@ class Task extends Model
     {
         return $this->hasMany(TaskStatusHistory::class);
     }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class);
+    }
+
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(TaskActivityLog::class);
+    }
 }

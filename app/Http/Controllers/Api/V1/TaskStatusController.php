@@ -19,10 +19,13 @@ class TaskStatusController extends Controller
         UpdateTaskStatusRequest $request,
         Task $task,
     ): JsonResponse {
+        $validated = $request->validated();
+
         $updatedTask = $this->transitionService->transition(
             task: $task,
-            newStatus: $request->validated('status'),
+            newStatus: $validated['status'],
             changedBy: auth('api')->user(),
+            note: $validated['note'] ?? null,
         );
 
         return response()->json([

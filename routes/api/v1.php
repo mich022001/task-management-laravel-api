@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\TaskActivityController;
+use App\Http\Controllers\Api\V1\TaskCommentController;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\TaskStatusController;
 use App\Http\Controllers\Api\V1\TeamController;
@@ -41,6 +43,21 @@ Route::middleware([
     Route::patch(
         '/tasks/{task}/status',
         TaskStatusController::class,
+    );
+
+    Route::get(
+        '/tasks/{task}/comments',
+        [TaskCommentController::class, 'index'],
+    );
+
+    Route::post(
+        '/tasks/{task}/comments',
+        [TaskCommentController::class, 'store'],
+    );
+
+    Route::get(
+        '/tasks/{task}/activity',
+        TaskActivityController::class,
     );
 
     Route::middleware('role:admin,manager')->group(function () {

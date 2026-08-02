@@ -34,7 +34,12 @@ class TaskStatusTest extends TestCase
                 'message',
                 'Task status updated successfully.'
             )
-            ->assertJsonPath('data.task.status', 'in_progress');
+            ->assertJsonPath('data.task.status', 'in_progress')
+            ->assertJsonPath('data.task.allowed_transitions', [
+                'pending',
+                'completed',
+                'cancelled',
+            ]);
 
         $this->assertDatabaseHas('task_status_histories', [
             'task_id' => $task->id,
@@ -67,7 +72,8 @@ class TaskStatusTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertJsonPath('data.task.status', 'completed');
+            ->assertJsonPath('data.task.status', 'completed')
+            ->assertJsonPath('data.task.allowed_transitions', []);
 
         $task->refresh();
 

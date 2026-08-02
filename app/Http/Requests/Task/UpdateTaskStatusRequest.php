@@ -27,6 +27,23 @@ class UpdateTaskStatusRequest extends FormRequest
                     'cancelled',
                 ]),
             ],
+
+            'note' => [
+                'nullable',
+                'string',
+                'max:1000',
+            ],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('note')) {
+            $note = trim((string) $this->input('note'));
+
+            $this->merge([
+                'note' => $note !== '' ? $note : null,
+            ]);
+        }
     }
 }

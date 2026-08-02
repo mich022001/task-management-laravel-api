@@ -122,12 +122,34 @@ class TaskController extends Controller
             $validated,
             $currentUser,
         ) {
-            return Task::query()->create([
+            $task = Task::query()->create([
                 ...$validated,
                 'status' => 'pending',
                 'created_by' => $currentUser->id,
                 'completed_at' => null,
             ]);
+
+            $task->activityLogs()->create([
+                'actor_id' => $currentUser->id,
+                'action' => 'task_created',
+                'description' => sprintf(
+                    '%s created the task.',
+                    $currentUser->name,
+                ),
+                'changes' => [
+                    'created' => $task->only([
+                        'team_id',
+                        'title',
+                        'description',
+                        'status',
+                        'priority',
+                        'assigned_to',
+                        'due_date',
+                    ]),
+                ],
+            ]);
+
+            return $task;
         });
 
         $task->load([
@@ -152,8 +174,15 @@ class TaskController extends Controller
             'team.creator',
             'assignee',
             'creator',
-            'statusHistories.changedBy',
+            'comments.user',
         ]);
+
+        if (Gate::allows('viewActivity', $task)) {
+            $task->load([
+                'statusHistories.changedBy',
+                'activityLogs.actor',
+            ]);
+        }
 
         return response()->json([
             'message' => 'Task retrieved successfully.',
@@ -168,16 +197,47 @@ class TaskController extends Controller
         Task $task,
     ): JsonResponse {
         $validated = $request->validated();
+        $currentUser = auth('api')->user();
 
-        DB::transaction(function () use ($task, $validated) {
+        DB::transaction(function () use (
+            $task,
+            $validated,
+            $currentUser,
+        ) {
+            $originalValues = $task->only(array_keys($validated));
+
             $task->update($validated);
+
+            $changes = [];
+
+            foreach ($validated as $field => $newValue) {
+                $oldValue = $originalValues[$field] ?? null;
+
+                if ($oldValue != $newValue) {
+                    $changes[$field] = [
+                        'from' => $oldValue,
+                        'to' => $newValue,
+                    ];
+                }
+            }
+
+            if ($changes !== []) {
+                $task->activityLogs()->create([
+                    'actor_id' => $currentUser->id,
+                    'action' => 'task_updated',
+                    'description' => sprintf(
+                        '%s updated the task details.',
+                        $currentUser->name,
+                    ),
+                    'changes' => $changes,
+                ]);
+            }
         });
 
         $task->load([
             'team.creator',
             'assignee',
             'creator',
-            'statusHistories.changedBy',
         ]);
 
         return response()->json([

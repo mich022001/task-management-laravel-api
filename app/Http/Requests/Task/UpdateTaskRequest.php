@@ -129,6 +129,7 @@ class UpdateTaskRequest extends FormRequest
 
         return $team->members()
             ->where('users.id', $userId)
+            ->wherePivot('member_role', 'lead')
             ->exists();
     }
 }

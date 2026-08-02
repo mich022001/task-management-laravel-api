@@ -2,10 +2,13 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import AppLayout from '../components/layout/AppLayout.jsx';
 import Analytics from '../pages/Analytics.jsx';
+import CreateTask from '../pages/CreateTask.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
+import EditTask from '../pages/EditTask.jsx';
 import Forbidden from '../pages/Forbidden.jsx';
 import Login from '../pages/Login.jsx';
 import NotFound from '../pages/NotFound.jsx';
+import TaskDetails from '../pages/TaskDetails.jsx';
 import Tasks from '../pages/Tasks.jsx';
 import Teams from '../pages/Teams.jsx';
 import Users from '../pages/Users.jsx';
@@ -28,11 +31,20 @@ export default function AppRoutes() {
 
                     <Route path="/tasks" element={<Tasks />} />
 
+                    <Route path="/tasks/:taskId" element={<TaskDetails />} />
+
                     <Route
                         element={
                             <RoleRoute allowedRoles={['admin', 'manager']} />
                         }
                     >
+                        <Route path="/tasks/create" element={<CreateTask />} />
+
+                        <Route
+                            path="/tasks/:taskId/edit"
+                            element={<EditTask />}
+                        />
+
                         <Route path="/teams" element={<Teams />} />
 
                         <Route path="/analytics" element={<Analytics />} />

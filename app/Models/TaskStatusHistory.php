@@ -14,6 +14,7 @@ class TaskStatusHistory extends Model
         'task_id',
         'previous_status',
         'new_status',
+        'note',
         'changed_by',
     ];
 

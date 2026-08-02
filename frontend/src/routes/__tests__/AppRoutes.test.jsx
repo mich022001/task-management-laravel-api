@@ -100,7 +100,7 @@ describe('Application routes', () => {
             }),
         ).toBeInTheDocument();
 
-        expect(screen.getByText('System Admin')).toBeInTheDocument();
+        expect(screen.getAllByText('System Admin').length).toBeGreaterThan(0);
     });
 
     test('renders the Not Found page for an unknown route', () => {

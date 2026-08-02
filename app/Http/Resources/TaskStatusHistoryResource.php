@@ -18,6 +18,7 @@ class TaskStatusHistoryResource extends JsonResource
             'id' => $this->id,
             'previous_status' => $this->previous_status,
             'new_status' => $this->new_status,
+            'note' => $this->note,
 
             'changed_by' => new UserResource(
                 $this->whenLoaded('changedBy'),

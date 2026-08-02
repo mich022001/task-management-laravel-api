@@ -18,12 +18,11 @@ class TaskPolicy
             return true;
         }
 
-        if ($user->role === 'manager') {
-            return $this->belongsToTaskTeam($user, $task);
+        if ($this->managesTaskTeam($user, $task)) {
+            return true;
         }
 
-        return $user->role === 'team_member'
-            && $task->assigned_to === $user->id;
+        return $task->assigned_to === $user->id;
     }
 
     public function create(User $user): bool
@@ -34,34 +33,40 @@ class TaskPolicy
         ], true);
     }
 
-    /**
-     * Update task fields such as title, assignee, priority, team, and due date.
-     */
     public function update(User $user, Task $task): bool
     {
         if ($user->role === 'admin') {
             return true;
         }
 
-        return $user->role === 'manager'
-            && $this->belongsToTaskTeam($user, $task);
+        return $this->managesTaskTeam($user, $task);
     }
 
-    /**
-     * Update task status through the dedicated transition endpoint.
-     */
     public function changeStatus(User $user, Task $task): bool
     {
         if ($user->role === 'admin') {
             return true;
         }
 
-        if ($user->role === 'manager') {
-            return $this->belongsToTaskTeam($user, $task);
+        if ($this->managesTaskTeam($user, $task)) {
+            return true;
         }
 
-        return $user->role === 'team_member'
-            && $task->assigned_to === $user->id;
+        return $task->assigned_to === $user->id;
+    }
+
+    public function comment(User $user, Task $task): bool
+    {
+        return $this->view($user, $task);
+    }
+
+    public function viewActivity(User $user, Task $task): bool
+    {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        return $this->managesTaskTeam($user, $task);
     }
 
     public function delete(User $user, Task $task): bool
@@ -70,9 +75,8 @@ class TaskPolicy
             return true;
         }
 
-        return $user->role === 'manager'
-            && $task->created_by === $user->id
-            && $this->belongsToTaskTeam($user, $task);
+        return $this->managesTaskTeam($user, $task)
+            && $task->created_by === $user->id;
     }
 
     public function restore(User $user, Task $task): bool
@@ -85,9 +89,17 @@ class TaskPolicy
         return false;
     }
 
-    private function belongsToTaskTeam(User $user, Task $task): bool
+    private function managesTaskTeam(User $user, Task $task): bool
     {
+        if ($user->role !== 'manager') {
+            return false;
+        }
+
         $task->loadMissing('team');
+
+        if (! $task->team) {
+            return false;
+        }
 
         if ($task->team->created_by === $user->id) {
             return true;
@@ -96,6 +108,7 @@ class TaskPolicy
         return $task->team
             ->members()
             ->where('users.id', $user->id)
+            ->wherePivot('member_role', 'lead')
             ->exists();
     }
 }

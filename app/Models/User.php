@@ -86,6 +86,22 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * Comments written by the user on tasks.
+     */
+    public function taskComments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class);
+    }
+
+    /**
+     * Private task activity records performed by the user.
+     */
+    public function taskActivityLogs(): HasMany
+    {
+        return $this->hasMany(TaskActivityLog::class, 'actor_id');
+    }
+
+    /**
      * Get the identifier stored in the JWT subject claim.
      */
     public function getJWTIdentifier(): mixed

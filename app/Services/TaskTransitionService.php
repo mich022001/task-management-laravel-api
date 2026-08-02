@@ -10,8 +10,6 @@ use Illuminate\Validation\ValidationException;
 class TaskTransitionService
 {
     /**
-     * Allowed task status transitions.
-     *
      * @var array<string, array<int, string>>
      */
     private const TRANSITIONS = [
@@ -31,19 +29,19 @@ class TaskTransitionService
     ];
 
     /**
-     * Transition a task to a new status and record its history.
-     *
      * @throws ValidationException
      */
     public function transition(
         Task $task,
         string $newStatus,
         User $changedBy,
+        ?string $note = null,
     ): Task {
         return DB::transaction(function () use (
             $task,
             $newStatus,
             $changedBy,
+            $note,
         ) {
             /** @var Task $lockedTask */
             $lockedTask = Task::query()
@@ -80,21 +78,37 @@ class TaskTransitionService
             $lockedTask->statusHistories()->create([
                 'previous_status' => $previousStatus,
                 'new_status' => $newStatus,
+                'note' => $note,
                 'changed_by' => $changedBy->id,
             ]);
 
+            $lockedTask->activityLogs()->create([
+                'actor_id' => $changedBy->id,
+                'action' => 'status_changed',
+                'description' => sprintf(
+                    '%s changed the task status from %s to %s.',
+                    $changedBy->name,
+                    $previousStatus,
+                    $newStatus,
+                ),
+                'changes' => [
+                    'status' => [
+                        'from' => $previousStatus,
+                        'to' => $newStatus,
+                    ],
+                    'note' => $note,
+                ],
+            ]);
+
             return $lockedTask->fresh([
-                'team',
+                'team.creator',
                 'assignee',
                 'creator',
-                'statusHistories.changedBy',
             ]);
         });
     }
 
     /**
-     * Return the valid next statuses for a task.
-     *
      * @return array<int, string>
      */
     public function allowedTransitions(Task $task): array
