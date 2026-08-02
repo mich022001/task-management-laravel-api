@@ -44,6 +44,16 @@ class LoginTest extends TestCase
                     'expires_in',
                 ],
             ]);
+
+        $token = $response->json('data.access_token');
+
+        $payload = auth('api')
+            ->setToken($token)
+            ->payload();
+
+        $this->assertSame('admin@test.com', $payload->get('email'));
+        $this->assertSame('admin', $payload->get('role'));
+        $this->assertTrue($payload->get('is_active'));
     }
 
     public function test_invalid_credentials_return_unauthorized(): void
