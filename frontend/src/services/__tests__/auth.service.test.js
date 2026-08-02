@@ -42,7 +42,7 @@ describe('auth service', () => {
         mock.onGet('/auth/me').reply(200, {
             data: {
                 user: {
-                    id: 1,
+                    id: '44444444-4444-4444-8444-444444444444',
                     role: 'admin',
                 },
             },
@@ -51,7 +51,7 @@ describe('auth service', () => {
         const response = await getAuthenticatedUser();
 
         expect(response.data.user).toEqual({
-            id: 1,
+            id: '44444444-4444-4444-8444-444444444444',
             role: 'admin',
         });
     });

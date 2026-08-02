@@ -14,7 +14,7 @@ if (!laravelApiUrl) {
 
 export const laravelClient = axios.create({
     baseURL: laravelApiUrl,
-    timeout: 10_000,
+    timeout: 30_000,
     headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',

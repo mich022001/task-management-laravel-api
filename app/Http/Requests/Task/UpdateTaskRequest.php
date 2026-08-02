@@ -23,15 +23,15 @@ class UpdateTaskRequest extends FormRequest
             'team_id' => [
                 'sometimes',
                 'required',
-                'integer',
-                Rule::exists('teams', 'id'),
+                'uuid',
+                Rule::exists('teams', 'uuid'),
             ],
 
             'assigned_to' => [
                 'sometimes',
                 'nullable',
-                'integer',
-                Rule::exists('users', 'id')
+                'uuid',
+                Rule::exists('users', 'uuid')
                     ->where(fn ($query) => $query
                         ->where('is_active', true)
                         ->whereNull('deleted_at')),
@@ -79,11 +79,11 @@ class UpdateTaskRequest extends FormRequest
                     return;
                 }
 
-                $teamId = $this->has('team_id')
-                    ? $this->integer('team_id')
-                    : $task->team_id;
-
-                $team = Team::query()->find($teamId);
+                $team = $this->has('team_id')
+                    ? Team::query()
+                        ->where('uuid', $this->input('team_id'))
+                        ->first()
+                    : $task->team;
 
                 if (! $team) {
                     return;
@@ -91,7 +91,10 @@ class UpdateTaskRequest extends FormRequest
 
                 if (
                     $currentUser->role === 'manager'
-                    && ! $this->managerCanAccessTeam($team, $currentUser->id)
+                    && ! $this->managerCanAccessTeam(
+                        $team,
+                        $currentUser->id,
+                    )
                 ) {
                     $validator->errors()->add(
                         'team_id',
@@ -99,17 +102,23 @@ class UpdateTaskRequest extends FormRequest
                     );
                 }
 
-                $assigneeId = $this->has('assigned_to')
-                    ? $this->input('assigned_to')
-                    : $task->assigned_to;
+                if ($this->has('assigned_to')) {
+                    $assigneeUuid = $this->input('assigned_to');
 
-                if (! $assigneeId) {
+                    if (! $assigneeUuid) {
+                        return;
+                    }
+
+                    $belongsToTeam = $team->members()
+                        ->where('users.uuid', $assigneeUuid)
+                        ->exists();
+                } elseif ($task->assigned_to) {
+                    $belongsToTeam = $team->members()
+                        ->where('users.id', $task->assigned_to)
+                        ->exists();
+                } else {
                     return;
                 }
-
-                $belongsToTeam = $team->members()
-                    ->where('users.id', $assigneeId)
-                    ->exists();
 
                 if (! $belongsToTeam) {
                     $validator->errors()->add(

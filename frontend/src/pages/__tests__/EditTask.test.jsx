@@ -18,7 +18,7 @@ vi.mock('react-router-dom', async () => {
         ...actual,
         useNavigate: () => navigateMock,
         useParams: () => ({
-            taskId: '1',
+            taskId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         }),
     };
 });
@@ -53,12 +53,12 @@ describe('EditTask page', () => {
         getTaskMock.mockResolvedValue({
             data: {
                 task: {
-                    id: 1,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                     title: 'Setup database',
                     description: 'Configure PostgreSQL.',
                     priority: 'high',
-                    team_id: 1,
-                    assigned_to: 3,
+                    team_id: '11111111-1111-4111-8111-111111111111',
+                    assigned_to: '33333333-3333-4333-8333-333333333333',
                     due_date: '2026-08-10T00:00:00.000000Z',
                 },
             },
@@ -67,7 +67,7 @@ describe('EditTask page', () => {
         listTeamsMock.mockResolvedValue({
             data: [
                 {
-                    id: 1,
+                    id: '11111111-1111-4111-8111-111111111111',
                     name: 'Engineering',
                 },
             ],
@@ -76,10 +76,10 @@ describe('EditTask page', () => {
         getTeamMock.mockResolvedValue({
             data: {
                 team: {
-                    id: 1,
+                    id: '11111111-1111-4111-8111-111111111111',
                     members: [
                         {
-                            id: 3,
+                            id: '33333333-3333-4333-8333-333333333333',
                             name: 'Team Member',
                         },
                     ],
@@ -104,8 +104,12 @@ describe('EditTask page', () => {
             'Configure PostgreSQL.',
         );
         expect(screen.getByLabelText(/Priority/)).toHaveValue('high');
-        expect(screen.getByLabelText(/Assigned Team/)).toHaveValue('1');
-        expect(screen.getByLabelText(/Assignee/)).toHaveValue('3');
+        expect(screen.getByLabelText(/Assigned Team/)).toHaveValue(
+            '11111111-1111-4111-8111-111111111111',
+        );
+        expect(screen.getByLabelText(/Assignee/)).toHaveValue(
+            '33333333-3333-4333-8333-333333333333',
+        );
         expect(screen.getByLabelText(/Due Date/)).toHaveValue('2026-08-10');
     });
 
@@ -116,7 +120,7 @@ describe('EditTask page', () => {
             message: 'Task updated successfully.',
             data: {
                 task: {
-                    id: 1,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                 },
             },
         });
@@ -139,14 +143,17 @@ describe('EditTask page', () => {
         );
 
         await waitFor(() => {
-            expect(updateTaskMock).toHaveBeenCalledWith('1', {
-                title: 'Updated database setup',
-                description: 'Configure PostgreSQL.',
-                priority: 'high',
-                team_id: 1,
-                assigned_to: 3,
-                due_date: '2026-08-10',
-            });
+            expect(updateTaskMock).toHaveBeenCalledWith(
+                'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+                {
+                    title: 'Updated database setup',
+                    description: 'Configure PostgreSQL.',
+                    priority: 'high',
+                    team_id: '11111111-1111-4111-8111-111111111111',
+                    assigned_to: '33333333-3333-4333-8333-333333333333',
+                    due_date: '2026-08-10',
+                },
+            );
         });
 
         expect(sessionStorage.getItem('task_success_message')).toBe(

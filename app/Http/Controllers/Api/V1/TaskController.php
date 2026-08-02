@@ -7,6 +7,8 @@ use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,16 +62,22 @@ class TaskController extends Controller
             )
             ->when(
                 $request->filled('team_id'),
-                fn ($builder) => $builder->where(
-                    'team_id',
-                    $request->integer('team_id'),
+                fn ($builder) => $builder->whereHas(
+                    'team',
+                    fn ($teamQuery) => $teamQuery->where(
+                        'uuid',
+                        $request->string('team_id')->toString(),
+                    ),
                 ),
             )
             ->when(
                 $request->filled('assigned_to'),
-                fn ($builder) => $builder->where(
-                    'assigned_to',
-                    $request->integer('assigned_to'),
+                fn ($builder) => $builder->whereHas(
+                    'assignee',
+                    fn ($userQuery) => $userQuery->where(
+                        'uuid',
+                        $request->string('assigned_to')->toString(),
+                    ),
                 ),
             )
             ->when(
@@ -117,6 +125,16 @@ class TaskController extends Controller
     {
         $validated = $request->validated();
         $currentUser = auth('api')->user();
+
+        $validated['team_id'] = Team::query()
+            ->where('uuid', $validated['team_id'])
+            ->valueOrFail('id');
+
+        $validated['assigned_to'] = isset($validated['assigned_to'])
+            ? User::query()
+                ->where('uuid', $validated['assigned_to'])
+                ->valueOrFail('id')
+            : null;
 
         $task = DB::transaction(function () use (
             $validated,
@@ -198,6 +216,21 @@ class TaskController extends Controller
     ): JsonResponse {
         $validated = $request->validated();
         $currentUser = auth('api')->user();
+
+        if (array_key_exists('team_id', $validated)) {
+            $validated['team_id'] = Team::query()
+                ->where('uuid', $validated['team_id'])
+                ->valueOrFail('id');
+        }
+
+        if (
+            array_key_exists('assigned_to', $validated)
+            && $validated['assigned_to'] !== null
+        ) {
+            $validated['assigned_to'] = User::query()
+                ->where('uuid', $validated['assigned_to'])
+                ->valueOrFail('id');
+        }
 
         DB::transaction(function () use (
             $task,

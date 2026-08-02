@@ -6,7 +6,7 @@ import TaskTable from '../TaskTable.jsx';
 
 const tasks = [
     {
-        id: 1,
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         title: 'Build task workflow',
         description: 'Implement task list and forms.',
         status: 'in_progress',
@@ -54,7 +54,10 @@ describe('TaskTable', () => {
             screen.getByRole('link', {
                 name: 'Edit',
             }),
-        ).toHaveAttribute('href', '/tasks/1/edit');
+        ).toHaveAttribute(
+            'href',
+            '/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/edit',
+        );
     });
 
     test('hides edit action when editing is not allowed', () => {

@@ -66,8 +66,8 @@ function buildPayload(values) {
         title: values.title.trim(),
         description: values.description.trim() || null,
         priority: values.priority,
-        team_id: Number(values.team_id),
-        assigned_to: values.assigned_to ? Number(values.assigned_to) : null,
+        team_id: values.team_id,
+        assigned_to: values.assigned_to || null,
         due_date: values.due_date || null,
     };
 }

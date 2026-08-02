@@ -54,22 +54,24 @@ describe('Task service', () => {
     });
 
     test('retrieves one task', async () => {
-        mock.onGet('/tasks/7').reply(200, {
+        mock.onGet('/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa').reply(200, {
             data: {
                 task: {
-                    id: 7,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                 },
             },
         });
 
-        const result = await getTask(7);
+        const result = await getTask('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
 
-        expect(result.data.task.id).toBe(7);
+        expect(result.data.task.id).toBe(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        );
     });
 
     test('creates a task', async () => {
         const payload = {
-            team_id: 1,
+            team_id: '11111111-1111-4111-8111-111111111111',
             title: 'Build task UI',
             priority: 'high',
         };
@@ -77,7 +79,7 @@ describe('Task service', () => {
         mock.onPost('/tasks', payload).reply(201, {
             data: {
                 task: {
-                    id: 10,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                     ...payload,
                 },
             },
@@ -85,62 +87,74 @@ describe('Task service', () => {
 
         const result = await createTask(payload);
 
-        expect(result.data.task.id).toBe(10);
+        expect(result.data.task.id).toBe(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        );
     });
 
     test('updates a task', async () => {
-        mock.onPatch('/tasks/10', {
+        mock.onPatch('/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', {
             title: 'Updated title',
         }).reply(200, {
             data: {
                 task: {
-                    id: 10,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                     title: 'Updated title',
                 },
             },
         });
 
-        const result = await updateTask(10, {
-            title: 'Updated title',
-        });
+        const result = await updateTask(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            {
+                title: 'Updated title',
+            },
+        );
 
         expect(result.data.task.title).toBe('Updated title');
     });
 
     test('updates task status', async () => {
-        mock.onPatch('/tasks/10/status', {
+        mock.onPatch('/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/status', {
             status: 'in_progress',
         }).reply(200, {
             data: {
                 task: {
-                    id: 10,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                     status: 'in_progress',
                 },
             },
         });
 
-        const result = await updateTaskStatus(10, 'in_progress');
+        const result = await updateTaskStatus(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            'in_progress',
+        );
 
         expect(result.data.task.status).toBe('in_progress');
     });
 
     test('lists task comments', async () => {
-        mock.onGet('/tasks/10/comments').reply(200, {
+        mock.onGet(
+            '/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/comments',
+        ).reply(200, {
             data: [
                 {
-                    id: 1,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                     body: 'Ready for review.',
                 },
             ],
         });
 
-        const result = await listTaskComments(10);
+        const result = await listTaskComments(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        );
 
         expect(result.data[0].body).toBe('Ready for review.');
     });
 
     test('creates a task comment', async () => {
-        mock.onPost('/tasks/10/comments', {
+        mock.onPost('/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/comments', {
             body: 'Ready for review.',
         }).reply(201, {
             data: {
@@ -151,30 +165,40 @@ describe('Task service', () => {
             },
         });
 
-        const result = await createTaskComment(10, '  Ready for review.  ');
+        const result = await createTaskComment(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            '  Ready for review.  ',
+        );
 
         expect(result.data.comment.id).toBe(2);
     });
 
     test('retrieves task activity', async () => {
-        mock.onGet('/tasks/10/activity').reply(200, {
+        mock.onGet(
+            '/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/activity',
+        ).reply(200, {
             data: {
                 activity_logs: [],
                 status_histories: [],
             },
         });
 
-        const result = await getTaskActivity(10);
+        const result = await getTaskActivity(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        );
 
         expect(result.data.activity_logs).toEqual([]);
     });
 
     test('deletes a task', async () => {
-        mock.onDelete('/tasks/10').reply(200, {
-            message: 'Task deleted successfully.',
-        });
+        mock.onDelete('/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa').reply(
+            200,
+            {
+                message: 'Task deleted successfully.',
+            },
+        );
 
-        const result = await deleteTask(10);
+        const result = await deleteTask('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
 
         expect(result.message).toBe('Task deleted successfully.');
     });

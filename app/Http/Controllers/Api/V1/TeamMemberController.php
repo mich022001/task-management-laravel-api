@@ -22,9 +22,13 @@ class TeamMemberController extends Controller
     ): JsonResponse {
         $validated = $request->validated();
 
-        DB::transaction(function () use ($team, $validated) {
+        $user = User::query()
+            ->where('uuid', $validated['user_id'])
+            ->firstOrFail();
+
+        DB::transaction(function () use ($team, $user, $validated) {
             $team->members()->syncWithoutDetaching([
-                $validated['user_id'] => [
+                $user->id => [
                     'member_role' => $validated['member_role'],
                 ],
             ]);

@@ -20,16 +20,20 @@ class AddTeamMemberRequest extends FormRequest
         return [
             'user_id' => [
                 'required',
-                'integer',
-                Rule::exists('users', 'id')
+                'uuid',
+                Rule::exists('users', 'uuid')
                     ->where(fn ($query) => $query
                         ->where('is_active', true)
                         ->whereNull('deleted_at')),
             ],
+
             'member_role' => [
                 'sometimes',
                 'string',
-                Rule::in(['lead', 'member']),
+                Rule::in([
+                    'lead',
+                    'member',
+                ]),
             ],
         ];
     }

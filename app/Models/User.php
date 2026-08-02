@@ -8,10 +8,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
+    protected static function booted(): void
+    {
+        static::creating(function (self $model) {
+            $model->uuid ??= (string) Str::uuid();
+        });
+    }
+
     use HasFactory;
     use Notifiable;
     use SoftDeletes;
@@ -102,11 +110,27 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Get the identifier stored in the JWT subject claim.
+     * Use the UUID when resolving users from public routes.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
+    /**
+     * Use the UUID when Laravel resolves an authenticated user.
+     */
+    public function getAuthIdentifierName(): string
+    {
+        return 'uuid';
+    }
+
+    /**
+     * Store the public UUID in the JWT subject claim.
      */
     public function getJWTIdentifier(): mixed
     {
-        return $this->getKey();
+        return $this->uuid;
     }
 
     /**

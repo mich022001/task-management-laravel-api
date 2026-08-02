@@ -22,8 +22,8 @@ class TeamMemberManagementTest extends TestCase
 
         $response = $this
             ->actingAs($admin, 'api')
-            ->postJson("/api/v1/teams/{$team->id}/members", [
-                'user_id' => $member->id,
+            ->postJson("/api/v1/teams/{$team->uuid}/members", [
+                'user_id' => $member->uuid,
                 'member_role' => 'member',
             ]);
 
@@ -55,8 +55,8 @@ class TeamMemberManagementTest extends TestCase
 
         $response = $this
             ->actingAs($admin, 'api')
-            ->postJson("/api/v1/teams/{$team->id}/members", [
-                'user_id' => $inactiveMember->id,
+            ->postJson("/api/v1/teams/{$team->uuid}/members", [
+                'user_id' => $inactiveMember->uuid,
             ]);
 
         $response
@@ -80,8 +80,8 @@ class TeamMemberManagementTest extends TestCase
 
         $response = $this
             ->actingAs($lead, 'api')
-            ->postJson("/api/v1/teams/{$team->id}/members", [
-                'user_id' => $member->id,
+            ->postJson("/api/v1/teams/{$team->uuid}/members", [
+                'user_id' => $member->uuid,
             ]);
 
         $response->assertOk();
@@ -109,8 +109,8 @@ class TeamMemberManagementTest extends TestCase
 
         $response = $this
             ->actingAs($manager, 'api')
-            ->postJson("/api/v1/teams/{$team->id}/members", [
-                'user_id' => $member->id,
+            ->postJson("/api/v1/teams/{$team->uuid}/members", [
+                'user_id' => $member->uuid,
             ]);
 
         $response->assertForbidden();
@@ -132,7 +132,7 @@ class TeamMemberManagementTest extends TestCase
         $response = $this
             ->actingAs($admin, 'api')
             ->deleteJson(
-                "/api/v1/teams/{$team->id}/members/{$member->id}"
+                "/api/v1/teams/{$team->uuid}/members/{$member->uuid}"
             );
 
         $response
@@ -163,7 +163,7 @@ class TeamMemberManagementTest extends TestCase
         $response = $this
             ->actingAs($admin, 'api')
             ->deleteJson(
-                "/api/v1/teams/{$team->id}/members/{$admin->id}"
+                "/api/v1/teams/{$team->uuid}/members/{$admin->uuid}"
             );
 
         $response

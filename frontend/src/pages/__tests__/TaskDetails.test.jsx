@@ -18,7 +18,7 @@ vi.mock('react-router-dom', async () => {
     return {
         ...actual,
         useParams: () => ({
-            taskId: '1',
+            taskId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         }),
     };
 });
@@ -33,19 +33,19 @@ vi.mock('../../services/task.service.js', () => ({
 
 function buildTask(overrides = {}) {
     return {
-        id: 1,
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         title: 'Implement task details',
         description: 'Build the complete task details workflow.',
         status: 'pending',
         allowed_transitions: ['in_progress', 'cancelled'],
         priority: 'high',
-        team_id: 1,
-        assigned_to: 3,
-        created_by: 2,
+        team_id: '11111111-1111-4111-8111-111111111111',
+        assigned_to: '33333333-3333-4333-8333-333333333333',
+        created_by: '22222222-2222-4222-8222-222222222222',
         due_date: '2026-08-10T00:00:00.000000Z',
         updated_at: '2026-08-03T08:00:00.000000Z',
         team: {
-            id: 1,
+            id: '11111111-1111-4111-8111-111111111111',
             name: 'Engineering',
         },
         assignee: {
@@ -63,7 +63,7 @@ function buildTask(overrides = {}) {
 function buildComments() {
     return [
         {
-            id: 1,
+            id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
             body: 'Frontend implementation is ready for review.',
             user: {
                 id: 3,
@@ -90,7 +90,7 @@ function buildActivityResponse() {
         data: {
             activity_logs: [
                 {
-                    id: 1,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                     action: 'task_updated',
                     description: 'Team Manager updated the task.',
                     changes: {
@@ -119,7 +119,7 @@ function buildActivityResponse() {
             ],
             status_histories: [
                 {
-                    id: 1,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                     previous_status: 'pending',
                     new_status: 'in_progress',
                     note: 'Development started.',
@@ -136,7 +136,9 @@ function buildActivityResponse() {
 
 function renderPage(role = 'admin') {
     return render(
-        <MemoryRouter initialEntries={['/tasks/1']}>
+        <MemoryRouter
+            initialEntries={['/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa']}
+        >
             <AuthContext.Provider
                 value={{
                     user: {
@@ -254,9 +256,15 @@ describe('TaskDetails page', () => {
             screen.getByText('Status changed from Pending to In Progress'),
         ).toBeInTheDocument();
 
-        expect(getTaskMock).toHaveBeenCalledWith('1');
-        expect(listTaskCommentsMock).toHaveBeenCalledWith('1');
-        expect(getTaskActivityMock).toHaveBeenCalledWith('1');
+        expect(getTaskMock).toHaveBeenCalledWith(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        );
+        expect(listTaskCommentsMock).toHaveBeenCalledWith(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        );
+        expect(getTaskActivityMock).toHaveBeenCalledWith(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        );
     });
 
     test('updates task status with a transition note', async () => {
@@ -287,7 +295,7 @@ describe('TaskDetails page', () => {
                             new_status: 'in_progress',
                             note: 'Starting implementation now.',
                             changed_by: {
-                                id: 1,
+                                id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                                 name: 'System Admin',
                             },
                             created_at: '2026-08-03T11:00:00.000000Z',
@@ -320,7 +328,7 @@ describe('TaskDetails page', () => {
 
         await waitFor(() => {
             expect(updateTaskStatusMock).toHaveBeenCalledWith(
-                '1',
+                'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                 'in_progress',
                 '  Starting implementation now.  ',
             );
@@ -384,7 +392,11 @@ describe('TaskDetails page', () => {
             ),
         ).toBeInTheDocument();
 
-        expect(updateTaskStatusMock).toHaveBeenCalledWith('1', 'completed', '');
+        expect(updateTaskStatusMock).toHaveBeenCalledWith(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+            'completed',
+            '',
+        );
     });
 
     test('requires a selected status before submission', async () => {
@@ -413,7 +425,7 @@ describe('TaskDetails page', () => {
             id: 3,
             body: 'The final implementation has been deployed.',
             user: {
-                id: 1,
+                id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                 name: 'System Admin',
             },
             created_at: '2026-08-03T12:00:00.000000Z',
@@ -438,7 +450,7 @@ describe('TaskDetails page', () => {
                             description: 'System Admin added a task comment.',
                             changes: null,
                             actor: {
-                                id: 1,
+                                id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                                 name: 'System Admin',
                             },
                             created_at: '2026-08-03T12:00:00.000000Z',
@@ -467,7 +479,7 @@ describe('TaskDetails page', () => {
 
         await waitFor(() => {
             expect(createTaskCommentMock).toHaveBeenCalledWith(
-                '1',
+                'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                 'The final implementation has been deployed.',
             );
         });
@@ -665,7 +677,9 @@ describe('TaskDetails page', () => {
             }),
         ).not.toBeInTheDocument();
 
-        expect(getTaskActivityMock).toHaveBeenCalledWith('1');
+        expect(getTaskActivityMock).toHaveBeenCalledWith(
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        );
     });
 
     test('displays a task loading failure and retries', async () => {

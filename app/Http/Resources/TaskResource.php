@@ -9,15 +9,18 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class TaskResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
-     *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'team_id' => $this->team_id,
+            'id' => $this->uuid,
+
+            'team_id' => $this->whenLoaded(
+                'team',
+                fn () => $this->team?->uuid,
+            ),
+
             'title' => $this->title,
             'description' => $this->description,
             'status' => $this->status,
@@ -27,8 +30,17 @@ class TaskResource extends JsonResource
             )->allowedTransitions($this->resource),
 
             'priority' => $this->priority,
-            'assigned_to' => $this->assigned_to,
-            'created_by' => $this->created_by,
+
+            'assigned_to' => $this->whenLoaded(
+                'assignee',
+                fn () => $this->assignee?->uuid,
+            ),
+
+            'created_by' => $this->whenLoaded(
+                'creator',
+                fn () => $this->creator?->uuid,
+            ),
+
             'due_date' => $this->due_date,
             'completed_at' => $this->completed_at,
 

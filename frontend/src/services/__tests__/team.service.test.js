@@ -4,6 +4,9 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import laravelClient from '../../api/laravelClient.js';
 import { getTeam, listTeams } from '../team.service.js';
 
+const TEAM_UUID = '11111111-1111-4111-8111-111111111111';
+const MEMBER_UUID = '33333333-3333-4333-8333-333333333333';
+
 describe('Team service', () => {
     let mock;
 
@@ -27,7 +30,7 @@ describe('Team service', () => {
                 {
                     data: [
                         {
-                            id: 1,
+                            id: TEAM_UUID,
                             name: 'Engineering',
                         },
                     ],
@@ -41,16 +44,18 @@ describe('Team service', () => {
         });
 
         expect(result.data).toHaveLength(1);
+        expect(result.data[0].id).toBe(TEAM_UUID);
     });
 
     test('retrieves one team with members', async () => {
-        mock.onGet('/teams/1').reply(200, {
+        mock.onGet(`/teams/${TEAM_UUID}`).reply(200, {
             data: {
                 team: {
-                    id: 1,
+                    id: TEAM_UUID,
+                    name: 'Engineering',
                     members: [
                         {
-                            id: 3,
+                            id: MEMBER_UUID,
                             name: 'Team Member',
                         },
                     ],
@@ -58,8 +63,10 @@ describe('Team service', () => {
             },
         });
 
-        const result = await getTeam(1);
+        const result = await getTeam(TEAM_UUID);
 
+        expect(result.data.team.id).toBe(TEAM_UUID);
         expect(result.data.team.members).toHaveLength(1);
+        expect(result.data.team.members[0].id).toBe(MEMBER_UUID);
     });
 });

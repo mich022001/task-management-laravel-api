@@ -22,7 +22,7 @@ class TaskActivityTest extends TestCase
 
         $createResponse = $this
             ->actingAs($member, 'api')
-            ->postJson("/api/v1/tasks/{$task->id}/comments", [
+            ->postJson("/api/v1/tasks/{$task->uuid}/comments", [
                 'body' => 'The implementation is ready for review.',
             ]);
 
@@ -38,7 +38,7 @@ class TaskActivityTest extends TestCase
             )
             ->assertJsonPath(
                 'data.comment.user.id',
-                $member->id,
+                $member->uuid,
             );
 
         $this->assertDatabaseHas('task_comments', [
@@ -49,7 +49,7 @@ class TaskActivityTest extends TestCase
 
         $listResponse = $this
             ->actingAs($member, 'api')
-            ->getJson("/api/v1/tasks/{$task->id}/comments");
+            ->getJson("/api/v1/tasks/{$task->uuid}/comments");
 
         $listResponse
             ->assertOk()
@@ -70,12 +70,12 @@ class TaskActivityTest extends TestCase
 
         $this
             ->actingAs($member, 'api')
-            ->getJson("/api/v1/tasks/{$task->id}/comments")
+            ->getJson("/api/v1/tasks/{$task->uuid}/comments")
             ->assertForbidden();
 
         $this
             ->actingAs($member, 'api')
-            ->postJson("/api/v1/tasks/{$task->id}/comments", [
+            ->postJson("/api/v1/tasks/{$task->uuid}/comments", [
                 'body' => 'Unauthorized comment.',
             ])
             ->assertForbidden();
@@ -91,7 +91,7 @@ class TaskActivityTest extends TestCase
 
         $this
             ->actingAs($member, 'api')
-            ->postJson("/api/v1/tasks/{$task->id}/comments", [
+            ->postJson("/api/v1/tasks/{$task->uuid}/comments", [
                 'body' => '   ',
             ])
             ->assertUnprocessable()
@@ -110,7 +110,7 @@ class TaskActivityTest extends TestCase
 
         $response = $this
             ->actingAs($member, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}/status", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
                 'status' => 'in_progress',
                 'note' => 'Started after requirements clarification.',
             ]);
@@ -159,7 +159,7 @@ class TaskActivityTest extends TestCase
 
         $response = $this
             ->actingAs($admin, 'api')
-            ->getJson("/api/v1/tasks/{$task->id}/activity");
+            ->getJson("/api/v1/tasks/{$task->uuid}/activity");
 
         $response
             ->assertOk()
@@ -169,7 +169,7 @@ class TaskActivityTest extends TestCase
             )
             ->assertJsonPath(
                 'data.activity_logs.0.actor.id',
-                $manager->id,
+                $manager->uuid,
             );
     }
 
@@ -193,7 +193,7 @@ class TaskActivityTest extends TestCase
 
         $this
             ->actingAs($lead, 'api')
-            ->getJson("/api/v1/tasks/{$task->id}/activity")
+            ->getJson("/api/v1/tasks/{$task->uuid}/activity")
             ->assertOk();
     }
 
@@ -217,7 +217,7 @@ class TaskActivityTest extends TestCase
 
         $this
             ->actingAs($manager, 'api')
-            ->getJson("/api/v1/tasks/{$task->id}/activity")
+            ->getJson("/api/v1/tasks/{$task->uuid}/activity")
             ->assertForbidden();
     }
 
@@ -231,7 +231,7 @@ class TaskActivityTest extends TestCase
 
         $this
             ->actingAs($member, 'api')
-            ->getJson("/api/v1/tasks/{$task->id}/activity")
+            ->getJson("/api/v1/tasks/{$task->uuid}/activity")
             ->assertForbidden();
     }
 
@@ -252,7 +252,7 @@ class TaskActivityTest extends TestCase
 
         $this
             ->actingAs($manager, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}", [
                 'priority' => 'high',
             ])
             ->assertOk();
@@ -275,7 +275,7 @@ class TaskActivityTest extends TestCase
 
         $this
             ->actingAs($member, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}/status", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
                 'status' => 'in_progress',
                 'note' => 'Work started.',
             ])
@@ -298,7 +298,7 @@ class TaskActivityTest extends TestCase
 
         $this
             ->actingAs($member, 'api')
-            ->postJson("/api/v1/tasks/{$task->id}/comments", [
+            ->postJson("/api/v1/tasks/{$task->uuid}/comments", [
                 'body' => 'Waiting for deployment approval.',
             ])
             ->assertCreated();

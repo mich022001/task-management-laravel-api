@@ -48,11 +48,11 @@ class InternalResourceTest extends TestCase
 
         $response = $this
             ->withHeader('X-Service-Key', $this->serviceKey)
-            ->getJson("/api/v1/internal/users/{$user->id}");
+            ->getJson("/api/v1/internal/users/{$user->uuid}");
 
         $response
             ->assertOk()
-            ->assertJsonPath('data.user.id', $user->id)
+            ->assertJsonPath('data.user.id', $user->uuid)
             ->assertJsonPath('data.user.email', $user->email);
     }
 
@@ -71,7 +71,7 @@ class InternalResourceTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonFragment([
-                'id' => $team->id,
+                'id' => $team->uuid,
                 'name' => $team->name,
             ]);
     }
@@ -91,13 +91,13 @@ class InternalResourceTest extends TestCase
 
         $response = $this
             ->withHeader('X-Service-Key', $this->serviceKey)
-            ->getJson("/api/v1/internal/teams/{$team->id}");
+            ->getJson("/api/v1/internal/teams/{$team->uuid}");
 
         $response
             ->assertOk()
-            ->assertJsonPath('data.team.id', $team->id)
+            ->assertJsonPath('data.team.id', $team->uuid)
             ->assertJsonFragment([
-                'id' => $member->id,
+                'id' => $member->uuid,
                 'email' => $member->email,
             ]);
     }
@@ -136,7 +136,7 @@ class InternalResourceTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.id', $task->id);
+            ->assertJsonPath('data.0.id', $task->uuid);
     }
 
     public function test_internal_task_detail_returns_status_history(): void
@@ -145,11 +145,11 @@ class InternalResourceTest extends TestCase
 
         $response = $this
             ->withHeader('X-Service-Key', $this->serviceKey)
-            ->getJson("/api/v1/internal/tasks/{$task->id}");
+            ->getJson("/api/v1/internal/tasks/{$task->uuid}");
 
         $response
             ->assertOk()
-            ->assertJsonPath('data.task.id', $task->id)
+            ->assertJsonPath('data.task.id', $task->uuid)
             ->assertJsonStructure([
                 'data' => [
                     'task' => [
@@ -201,8 +201,8 @@ class InternalResourceTest extends TestCase
         $teamIds = collect($response->json('data'))
             ->pluck('id');
 
-        $this->assertTrue($teamIds->contains($createdTeam->id));
-        $this->assertTrue($teamIds->contains($joinedTeam->id));
-        $this->assertFalse($teamIds->contains($unrelatedTeam->id));
+        $this->assertTrue($teamIds->contains($createdTeam->uuid));
+        $this->assertTrue($teamIds->contains($joinedTeam->uuid));
+        $this->assertFalse($teamIds->contains($unrelatedTeam->uuid));
     }
 }

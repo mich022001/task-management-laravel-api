@@ -13,7 +13,7 @@ class TaskCommentResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->uuid,
             'body' => $this->body,
 
             'user' => new UserResource(

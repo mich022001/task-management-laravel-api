@@ -18,7 +18,7 @@ describe('Analytics service', () => {
     test('retrieves task summary', async () => {
         mock.onGet('/analytics/tasks/summary').reply((config) => {
             expect(config.params).toEqual({
-                team_id: 1,
+                team_id: '11111111-1111-4111-8111-111111111111',
             });
 
             return [
@@ -33,7 +33,7 @@ describe('Analytics service', () => {
         });
 
         const result = await getTaskSummary({
-            team_id: 1,
+            team_id: '11111111-1111-4111-8111-111111111111',
         });
 
         expect(result.data.total_tasks).toBe(5);

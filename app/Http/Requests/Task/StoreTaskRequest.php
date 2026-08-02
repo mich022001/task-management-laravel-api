@@ -20,14 +20,14 @@ class StoreTaskRequest extends FormRequest
         return [
             'team_id' => [
                 'required',
-                'integer',
-                Rule::exists('teams', 'id'),
+                'uuid',
+                Rule::exists('teams', 'uuid'),
             ],
 
             'assigned_to' => [
                 'nullable',
-                'integer',
-                Rule::exists('users', 'id')
+                'uuid',
+                Rule::exists('users', 'uuid')
                     ->where(fn ($query) => $query
                         ->where('is_active', true)
                         ->whereNull('deleted_at')),
@@ -65,14 +65,16 @@ class StoreTaskRequest extends FormRequest
         return [
             function (Validator $validator): void {
                 $currentUser = auth('api')->user();
-                $teamId = $this->integer('team_id');
-                $assigneeId = $this->input('assigned_to');
+                $teamUuid = $this->string('team_id')->toString();
+                $assigneeUuid = $this->input('assigned_to');
 
-                if (! $currentUser || ! $teamId) {
+                if (! $currentUser || $teamUuid === '') {
                     return;
                 }
 
-                $team = Team::query()->find($teamId);
+                $team = Team::query()
+                    ->where('uuid', $teamUuid)
+                    ->first();
 
                 if (! $team) {
                     return;
@@ -80,7 +82,10 @@ class StoreTaskRequest extends FormRequest
 
                 if (
                     $currentUser->role === 'manager'
-                    && ! $this->managerCanAccessTeam($team, $currentUser->id)
+                    && ! $this->managerCanAccessTeam(
+                        $team,
+                        $currentUser->id,
+                    )
                 ) {
                     $validator->errors()->add(
                         'team_id',
@@ -88,12 +93,12 @@ class StoreTaskRequest extends FormRequest
                     );
                 }
 
-                if (! $assigneeId) {
+                if (! $assigneeUuid) {
                     return;
                 }
 
                 $belongsToTeam = $team->members()
-                    ->where('users.id', $assigneeId)
+                    ->where('users.uuid', $assigneeUuid)
                     ->exists();
 
                 if (! $belongsToTeam) {

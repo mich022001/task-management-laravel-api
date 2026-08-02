@@ -47,7 +47,7 @@ describe('CreateTask page', () => {
         listTeamsMock.mockResolvedValue({
             data: [
                 {
-                    id: 1,
+                    id: '11111111-1111-4111-8111-111111111111',
                     name: 'Engineering',
                 },
             ],
@@ -56,7 +56,7 @@ describe('CreateTask page', () => {
         getTeamMock.mockResolvedValue({
             data: {
                 team: {
-                    id: 1,
+                    id: '11111111-1111-4111-8111-111111111111',
                     members: [],
                 },
             },
@@ -69,10 +69,10 @@ describe('CreateTask page', () => {
         getTeamMock.mockResolvedValue({
             data: {
                 team: {
-                    id: 1,
+                    id: '11111111-1111-4111-8111-111111111111',
                     members: [
                         {
-                            id: 3,
+                            id: '33333333-3333-4333-8333-333333333333',
                             name: 'Team Member',
                         },
                     ],
@@ -84,7 +84,7 @@ describe('CreateTask page', () => {
             message: 'Task created successfully.',
             data: {
                 task: {
-                    id: 10,
+                    id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                 },
             },
         });
@@ -103,15 +103,23 @@ describe('CreateTask page', () => {
 
         await user.selectOptions(screen.getByLabelText(/Priority/), 'high');
 
-        await user.selectOptions(screen.getByLabelText(/Assigned Team/), '1');
+        await user.selectOptions(
+            screen.getByLabelText(/Assigned Team/),
+            '11111111-1111-4111-8111-111111111111',
+        );
 
-        expect(getTeamMock).toHaveBeenCalledWith('1');
+        expect(getTeamMock).toHaveBeenCalledWith(
+            '11111111-1111-4111-8111-111111111111',
+        );
 
         await screen.findByRole('option', {
             name: 'Team Member',
         });
 
-        await user.selectOptions(screen.getByLabelText(/Assignee/), '3');
+        await user.selectOptions(
+            screen.getByLabelText(/Assignee/),
+            '33333333-3333-4333-8333-333333333333',
+        );
 
         await user.type(screen.getByLabelText(/Due Date/), '2026-08-10');
 
@@ -126,8 +134,8 @@ describe('CreateTask page', () => {
                 title: 'Build task workflow',
                 description: null,
                 priority: 'high',
-                team_id: 1,
-                assigned_to: 3,
+                team_id: '11111111-1111-4111-8111-111111111111',
+                assigned_to: '33333333-3333-4333-8333-333333333333',
                 due_date: '2026-08-10',
             });
         });
@@ -193,7 +201,10 @@ describe('CreateTask page', () => {
 
         await user.type(screen.getByLabelText(/Title/), 'Existing task');
         await user.selectOptions(screen.getByLabelText(/Priority/), 'medium');
-        await user.selectOptions(screen.getByLabelText(/Assigned Team/), '1');
+        await user.selectOptions(
+            screen.getByLabelText(/Assigned Team/),
+            '11111111-1111-4111-8111-111111111111',
+        );
 
         await user.click(
             screen.getByRole('button', {

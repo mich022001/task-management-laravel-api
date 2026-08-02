@@ -51,7 +51,7 @@ class TeamManagementTest extends TestCase
             ->assertCreated()
             ->assertJsonPath('message', 'Team created successfully.')
             ->assertJsonPath('data.team.name', 'Platform Team')
-            ->assertJsonPath('data.team.members.0.id', $manager->id)
+            ->assertJsonPath('data.team.members.0.id', $manager->uuid)
             ->assertJsonPath(
                 'data.team.members.0.member_role',
                 'lead'
@@ -124,11 +124,11 @@ class TeamManagementTest extends TestCase
 
         $response = $this
             ->actingAs($manager, 'api')
-            ->getJson("/api/v1/teams/{$team->id}");
+            ->getJson("/api/v1/teams/{$team->uuid}");
 
         $response
             ->assertOk()
-            ->assertJsonPath('data.team.id', $team->id);
+            ->assertJsonPath('data.team.id', $team->uuid);
     }
 
     public function test_team_member_cannot_access_team_management(): void

@@ -24,7 +24,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this
             ->actingAs($member, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}/status", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
                 'status' => 'in_progress',
             ]);
 
@@ -66,7 +66,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this
             ->actingAs($manager, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}/status", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
                 'status' => 'completed',
             ]);
 
@@ -97,7 +97,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this
             ->actingAs($admin, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}/status", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
                 'status' => 'cancelled',
             ]);
 
@@ -117,7 +117,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this
             ->actingAs($admin, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}/status", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
                 'status' => 'pending',
             ]);
 
@@ -141,7 +141,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this
             ->actingAs($admin, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}/status", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
                 'status' => 'pending',
             ]);
 
@@ -162,7 +162,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this
             ->actingAs($member, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}/status", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
                 'status' => 'in_progress',
             ]);
 
@@ -180,7 +180,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this
             ->actingAs($admin, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}/status", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
                 'status' => 'in_progress',
             ]);
 

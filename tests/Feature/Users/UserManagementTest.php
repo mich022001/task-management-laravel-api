@@ -142,7 +142,7 @@ class UserManagementTest extends TestCase
 
         $updateResponse = $this
             ->actingAs($admin, 'api')
-            ->patchJson("/api/v1/users/{$member->id}", [
+            ->patchJson("/api/v1/users/{$member->uuid}", [
                 'name' => 'Updated Member',
                 'email' => 'updated.member@example.com',
                 'role' => 'team_member',
@@ -158,7 +158,7 @@ class UserManagementTest extends TestCase
 
         $statusResponse = $this
             ->actingAs($admin, 'api')
-            ->patchJson("/api/v1/users/{$member->id}/status", [
+            ->patchJson("/api/v1/users/{$member->uuid}/status", [
                 'is_active' => false,
             ]);
 
@@ -255,7 +255,7 @@ class UserManagementTest extends TestCase
 
         $this
             ->actingAs($manager, 'api')
-            ->getJson("/api/v1/users/{$member->id}")
+            ->getJson("/api/v1/users/{$member->uuid}")
             ->assertOk();
     }
 
@@ -266,7 +266,7 @@ class UserManagementTest extends TestCase
 
         $this
             ->actingAs($manager, 'api')
-            ->getJson("/api/v1/users/{$member->id}")
+            ->getJson("/api/v1/users/{$member->uuid}")
             ->assertForbidden();
     }
 
@@ -280,7 +280,7 @@ class UserManagementTest extends TestCase
 
         $this
             ->actingAs($manager, 'api')
-            ->patchJson("/api/v1/users/{$member->id}", [
+            ->patchJson("/api/v1/users/{$member->uuid}", [
                 'name' => 'Unauthorized Update',
             ])
             ->assertForbidden();
@@ -301,7 +301,7 @@ class UserManagementTest extends TestCase
 
         $this
             ->actingAs($manager, 'api')
-            ->patchJson("/api/v1/users/{$member->id}/status", [
+            ->patchJson("/api/v1/users/{$member->uuid}/status", [
                 'is_active' => false,
             ])
             ->assertForbidden();
@@ -333,7 +333,7 @@ class UserManagementTest extends TestCase
 
         $this
             ->actingAs($teamLead, 'api')
-            ->patchJson("/api/v1/users/{$member->id}", [
+            ->patchJson("/api/v1/users/{$member->uuid}", [
                 'name' => 'Lead Updated Member',
             ])
             ->assertOk()

@@ -7,9 +7,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Team extends Model
 {
+    /**
+     * Use the UUID when resolving the model from public routes.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $model) {
+            $model->uuid ??= (string) Str::uuid();
+        });
+    }
+
     use HasFactory;
 
     protected $fillable = [

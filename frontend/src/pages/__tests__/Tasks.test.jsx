@@ -23,7 +23,7 @@ function renderTasks(role = 'admin') {
             <AuthContext.Provider
                 value={{
                     user: {
-                        id: 1,
+                        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
                         name: 'Test User',
                         role,
                     },
@@ -53,7 +53,7 @@ function buildTaskResponse(tasks = []) {
 
 function buildPendingTask(overrides = {}) {
     return {
-        id: 1,
+        id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
         title: 'Build task UI',
         description: 'Create the task interface.',
         status: 'pending',
@@ -79,7 +79,7 @@ describe('Tasks page', () => {
         listTeamsMock.mockResolvedValue({
             data: [
                 {
-                    id: 1,
+                    id: '11111111-1111-4111-8111-111111111111',
                     name: 'Engineering',
                 },
             ],
@@ -101,13 +101,19 @@ describe('Tasks page', () => {
             screen.getByRole('link', {
                 name: 'Details',
             }),
-        ).toHaveAttribute('href', '/tasks/1');
+        ).toHaveAttribute(
+            'href',
+            '/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+        );
 
         expect(
             screen.getByRole('link', {
                 name: 'Edit',
             }),
-        ).toHaveAttribute('href', '/tasks/1/edit');
+        ).toHaveAttribute(
+            'href',
+            '/tasks/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/edit',
+        );
 
         expect(listTasksMock).toHaveBeenCalledWith({
             page: 1,
@@ -141,7 +147,10 @@ describe('Tasks page', () => {
 
         await user.selectOptions(screen.getByLabelText('Priority'), 'high');
 
-        await user.selectOptions(screen.getByLabelText('Team'), '1');
+        await user.selectOptions(
+            screen.getByLabelText('Team'),
+            '11111111-1111-4111-8111-111111111111',
+        );
 
         await user.click(
             screen.getByRole('button', {
@@ -156,7 +165,7 @@ describe('Tasks page', () => {
                 search: 'dashboard',
                 status: 'in_progress',
                 priority: 'high',
-                team_id: '1',
+                team_id: '11111111-1111-4111-8111-111111111111',
             });
         });
     });
@@ -234,7 +243,7 @@ describe('Tasks page', () => {
         renderTasks();
 
         expect(
-            await screen.findByText('Task service unavailable.'),
+            await screen.findByText(/Task service unavailable\./),
         ).toBeInTheDocument();
 
         await user.click(

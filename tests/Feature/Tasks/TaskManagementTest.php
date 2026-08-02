@@ -47,8 +47,8 @@ class TaskManagementTest extends TestCase
             ->actingAs($admin, 'api')
             ->getJson(
                 '/api/v1/tasks'
-                ."?team_id={$team->id}"
-                ."&assigned_to={$member->id}"
+                ."?team_id={$team->uuid}"
+                ."&assigned_to={$member->uuid}"
                 .'&status=pending'
                 .'&priority=high'
                 .'&search=documentation'
@@ -80,8 +80,8 @@ class TaskManagementTest extends TestCase
         $response = $this
             ->actingAs($manager, 'api')
             ->postJson('/api/v1/tasks', [
-                'team_id' => $team->id,
-                'assigned_to' => $member->id,
+                'team_id' => $team->uuid,
+                'assigned_to' => $member->uuid,
                 'title' => 'Implement task API',
                 'description' => 'Create the task endpoints.',
                 'priority' => 'high',
@@ -93,7 +93,7 @@ class TaskManagementTest extends TestCase
             ->assertJsonPath('message', 'Task created successfully.')
             ->assertJsonPath('data.task.title', 'Implement task API')
             ->assertJsonPath('data.task.status', 'pending')
-            ->assertJsonPath('data.task.created_by', $manager->id);
+            ->assertJsonPath('data.task.created_by', $manager->uuid);
 
         $this->assertDatabaseHas('tasks', [
             'team_id' => $team->id,
@@ -115,7 +115,7 @@ class TaskManagementTest extends TestCase
         $response = $this
             ->actingAs($manager, 'api')
             ->postJson('/api/v1/tasks', [
-                'team_id' => $team->id,
+                'team_id' => $team->uuid,
                 'title' => 'Unauthorized task',
                 'priority' => 'medium',
             ]);
@@ -137,8 +137,8 @@ class TaskManagementTest extends TestCase
         $response = $this
             ->actingAs($manager, 'api')
             ->postJson('/api/v1/tasks', [
-                'team_id' => $team->id,
-                'assigned_to' => $member->id,
+                'team_id' => $team->uuid,
+                'assigned_to' => $member->uuid,
                 'title' => 'Invalid assignment',
                 'priority' => 'medium',
             ]);
@@ -170,15 +170,15 @@ class TaskManagementTest extends TestCase
 
         $showResponse = $this
             ->actingAs($manager, 'api')
-            ->getJson("/api/v1/tasks/{$task->id}");
+            ->getJson("/api/v1/tasks/{$task->uuid}");
 
         $showResponse
             ->assertOk()
-            ->assertJsonPath('data.task.id', $task->id);
+            ->assertJsonPath('data.task.id', $task->uuid);
 
         $updateResponse = $this
             ->actingAs($manager, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}", [
                 'title' => 'Updated title',
                 'priority' => 'high',
             ]);
@@ -217,7 +217,7 @@ class TaskManagementTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonFragment([
-                'id' => $assignedTask->id,
+                'id' => $assignedTask->uuid,
                 'title' => 'Assigned task',
             ])
             ->assertJsonMissing([
@@ -235,7 +235,7 @@ class TaskManagementTest extends TestCase
 
         $response = $this
             ->actingAs($member, 'api')
-            ->patchJson("/api/v1/tasks/{$task->id}", [
+            ->patchJson("/api/v1/tasks/{$task->uuid}", [
                 'title' => 'Unauthorized update',
             ]);
 
@@ -257,7 +257,7 @@ class TaskManagementTest extends TestCase
 
         $response = $this
             ->actingAs($manager, 'api')
-            ->deleteJson("/api/v1/tasks/{$task->id}");
+            ->deleteJson("/api/v1/tasks/{$task->uuid}");
 
         $response
             ->assertOk()

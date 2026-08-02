@@ -50,7 +50,7 @@ describe('AuthProvider', () => {
         loginUserMock.mockResolvedValue({
             data: {
                 user: {
-                    id: 1,
+                    id: '44444444-4444-4444-8444-444444444444',
                     name: 'System Admin',
                     email: 'admin@test.com',
                     role: 'admin',
@@ -78,7 +78,7 @@ describe('AuthProvider', () => {
         expect(getAccessToken()).toBe('admin-jwt-token');
 
         expect(result.current.user).toEqual({
-            id: 1,
+            id: '44444444-4444-4444-8444-444444444444',
             name: 'System Admin',
             email: 'admin@test.com',
             role: 'admin',
@@ -97,7 +97,7 @@ describe('AuthProvider', () => {
         getAuthenticatedUserMock.mockResolvedValue({
             data: {
                 user: {
-                    id: 2,
+                    id: '22222222-2222-4222-8222-222222222222',
                     name: 'Team Manager',
                     email: 'manager@test.com',
                     role: 'manager',
@@ -125,7 +125,7 @@ describe('AuthProvider', () => {
         loginUserMock.mockResolvedValue({
             data: {
                 user: {
-                    id: 1,
+                    id: '44444444-4444-4444-8444-444444444444',
                     role: 'admin',
                 },
             },
@@ -152,7 +152,7 @@ describe('AuthProvider', () => {
         loginUserMock.mockResolvedValue({
             data: {
                 user: {
-                    id: 1,
+                    id: '44444444-4444-4444-8444-444444444444',
                     name: 'System Admin',
                     role: 'admin',
                 },
@@ -187,7 +187,7 @@ describe('AuthProvider', () => {
         getAuthenticatedUserMock.mockResolvedValue({
             data: {
                 user: {
-                    id: 3,
+                    id: '33333333-3333-4333-8333-333333333333',
                     name: 'Team Member',
                     email: 'member@test.com',
                     role: 'team_member',
@@ -206,7 +206,9 @@ describe('AuthProvider', () => {
         });
 
         expect(getAuthenticatedUserMock).toHaveBeenCalledTimes(1);
-        expect(result.current.user?.id).toBe(3);
+        expect(result.current.user?.id).toBe(
+            '33333333-3333-4333-8333-333333333333',
+        );
         expect(result.current.isAuthenticated).toBe(true);
         expect(getAccessToken()).toBe('existing-jwt-token');
     });
@@ -235,7 +237,7 @@ describe('AuthProvider', () => {
         loginUserMock.mockResolvedValue({
             data: {
                 user: {
-                    id: 1,
+                    id: '44444444-4444-4444-8444-444444444444',
                     name: 'System Admin',
                     role: 'admin',
                 },
@@ -267,7 +269,7 @@ describe('AuthProvider', () => {
         loginUserMock.mockResolvedValue({
             data: {
                 user: {
-                    id: 1,
+                    id: '44444444-4444-4444-8444-444444444444',
                     name: 'System Admin',
                     role: 'admin',
                 },
@@ -299,6 +301,4 @@ describe('AuthProvider', () => {
         expect(result.current.user).toBeNull();
         expect(result.current.isAuthenticated).toBe(false);
     });
-
-
 });

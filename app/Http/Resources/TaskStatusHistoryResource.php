@@ -15,7 +15,7 @@ class TaskStatusHistoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->uuid,
             'previous_status' => $this->previous_status,
             'new_status' => $this->new_status,
             'note' => $this->note,

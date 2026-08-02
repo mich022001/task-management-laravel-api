@@ -23,7 +23,19 @@ function consumeSuccessMessage() {
 }
 
 function getApiErrorMessage(error) {
-    return error.response?.data?.message ?? 'Tasks could not be loaded.';
+    const status = error.response?.status;
+    const method = error.config?.method?.toUpperCase() ?? 'REQUEST';
+    const url = error.config?.url ?? 'unknown endpoint';
+    const message =
+        error.response?.data?.message ??
+        error.message ??
+        'Tasks could not be loaded.';
+
+    const requestLabel = `${method} ${url}`;
+
+    return status
+        ? `${requestLabel} — HTTP ${status}: ${message}`
+        : `${requestLabel} — ${message}`;
 }
 
 const emptyFilters = Object.freeze({
@@ -52,7 +64,7 @@ function buildTaskParameters(page, filters) {
 }
 
 export default function Tasks() {
-    const { user } = useAuth();
+    const { user, isAuthenticated, isInitializing } = useAuth();
 
     const canManageTasks = user?.role === 'admin' || user?.role === 'manager';
 
@@ -75,6 +87,10 @@ export default function Tasks() {
     const [successMessage] = useState(consumeSuccessMessage);
 
     const retryLoadTasks = useCallback(async () => {
+        if (isInitializing || !isAuthenticated || !user) {
+            return;
+        }
+
         setIsLoading(true);
         setErrorMessage('');
 
@@ -92,7 +108,7 @@ export default function Tasks() {
         } finally {
             setIsLoading(false);
         }
-    }, [appliedFilters, page]);
+    }, [appliedFilters, isAuthenticated, isInitializing, page, user]);
 
     function changePage(nextPage) {
         setIsLoading(true);
@@ -124,7 +140,7 @@ export default function Tasks() {
     }
 
     useEffect(() => {
-        if (!canManageTasks) {
+        if (isInitializing || !isAuthenticated || !user || !canManageTasks) {
             return undefined;
         }
 
@@ -147,9 +163,13 @@ export default function Tasks() {
         return () => {
             isCancelled = true;
         };
-    }, [canManageTasks]);
+    }, [canManageTasks, isAuthenticated, isInitializing, user]);
 
     useEffect(() => {
+        if (isInitializing || !isAuthenticated || !user) {
+            return undefined;
+        }
+
         let isCancelled = false;
 
         listTasks(buildTaskParameters(page, appliedFilters))
@@ -180,7 +200,14 @@ export default function Tasks() {
         return () => {
             isCancelled = true;
         };
-    }, [appliedFilters, page, refreshKey]);
+    }, [
+        appliedFilters,
+        isAuthenticated,
+        isInitializing,
+        page,
+        refreshKey,
+        user,
+    ]);
 
     return (
         <section>
