@@ -107,7 +107,7 @@ class UserController extends Controller
                 'user' => new UserResource($user->fresh()),
             ],
         ], 201);
-    } 
+    }
 
     /**
      * Display a user.

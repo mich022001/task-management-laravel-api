@@ -29,10 +29,10 @@ class UserManagementTest extends TestCase
             ->actingAs($admin, 'api')
             ->getJson(
                 '/api/v1/users'
-                . '?role=team_member'
-                . '&status=active'
-                . '&search=michael'
-                . '&per_page=10'
+                .'?role=team_member'
+                .'&status=active'
+                .'&search=michael'
+                .'&per_page=10'
             );
 
         $response
@@ -192,8 +192,8 @@ class UserManagementTest extends TestCase
             ->assertJsonPath('data.user.is_active', true);
 
         $this->assertDatabaseHas('users', [
-           'email' => 'default.active@example.com',
-           'is_active' => true,
+            'email' => 'default.active@example.com',
+            'is_active' => true,
         ]);
     }
 }

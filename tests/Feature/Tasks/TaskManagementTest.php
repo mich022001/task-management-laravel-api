@@ -46,13 +46,13 @@ class TaskManagementTest extends TestCase
         $response = $this
             ->actingAs($admin, 'api')
             ->getJson(
-                "/api/v1/tasks"
-                . "?team_id={$team->id}"
-                . "&assigned_to={$member->id}"
-                . "&status=pending"
-                . "&priority=high"
-                . "&search=documentation"
-                . "&per_page=10"
+                '/api/v1/tasks'
+                ."?team_id={$team->id}"
+                ."&assigned_to={$member->id}"
+                .'&status=pending'
+                .'&priority=high'
+                .'&search=documentation'
+                .'&per_page=10'
             );
 
         $response

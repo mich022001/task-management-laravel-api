@@ -10,7 +10,7 @@ class TeamFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->company() . ' Team',
+            'name' => fake()->unique()->company().' Team',
             'created_by' => User::factory()->manager(),
         ];
     }

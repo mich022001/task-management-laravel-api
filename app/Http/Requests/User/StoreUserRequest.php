@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\User;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,7 +10,7 @@ class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth('api')->user()?->can('create', \App\Models\User::class) ?? false;
+        return auth('api')->user()?->can('create', User::class) ?? false;
     }
 
     public function rules(): array

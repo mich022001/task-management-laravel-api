@@ -13,8 +13,7 @@ class TaskStatusController extends Controller
 {
     public function __construct(
         private readonly TaskTransitionService $transitionService,
-    ) {
-    }
+    ) {}
 
     public function __invoke(
         UpdateTaskStatusRequest $request,
