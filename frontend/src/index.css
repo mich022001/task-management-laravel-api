@@ -4082,3 +4082,52 @@ body {
         backdrop-filter: none;
     }
 }
+
+.password-input-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.password-input-group input {
+    flex: 1;
+    min-width: 0;
+}
+
+.password-visibility-button {
+    min-width: 4.5rem;
+    padding: 0 0.85rem;
+    border: 1px solid var(--border-color, #d1d5db);
+    border-radius: 0.5rem;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+}
+
+.password-visibility-button:hover {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.password-visibility-button:focus-visible,
+.link-button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.link-button {
+    width: fit-content;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-decoration: underline;
+}
+
+.link-button:disabled,
+.password-visibility-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}

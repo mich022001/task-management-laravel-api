@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\TaskActivityController;
 use App\Http\Controllers\Api\V1\TaskCommentController;
 use App\Http\Controllers\Api\V1\TaskController;
@@ -20,6 +21,16 @@ Route::get('/ping', function () {
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])
         ->middleware('throttle:login');
+
+    Route::post(
+        '/forgot-password',
+        [PasswordResetController::class, 'sendResetLink'],
+    )->middleware('throttle:5,1');
+
+    Route::post(
+        '/reset-password',
+        [PasswordResetController::class, 'reset'],
+    )->middleware('throttle:5,1');
 
     Route::middleware([
         'auth:api',

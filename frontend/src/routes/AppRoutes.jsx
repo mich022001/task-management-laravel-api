@@ -6,7 +6,9 @@ import CreateTask from '../pages/CreateTask.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import EditTask from '../pages/EditTask.jsx';
 import Forbidden from '../pages/Forbidden.jsx';
+import ForgotPassword from '../pages/ForgotPassword.jsx';
 import Login from '../pages/Login.jsx';
+import ResetPassword from '../pages/ResetPassword.jsx';
 import NotFound from '../pages/NotFound.jsx';
 import TaskDetails from '../pages/TaskDetails.jsx';
 import Tasks from '../pages/Tasks.jsx';
@@ -19,6 +21,8 @@ export default function AppRoutes() {
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>

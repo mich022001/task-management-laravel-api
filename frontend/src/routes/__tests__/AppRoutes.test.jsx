@@ -47,6 +47,28 @@ describe('Application routes', () => {
         expect(screen.getByLabelText('Password')).toBeInTheDocument();
     });
 
+    test('renders the public reset-password page', () => {
+        renderAppRoutes({
+            initialEntries: [
+                '/reset-password?token=test-token&email=user%40test.com',
+            ],
+        });
+
+        expect(
+            screen.getByRole('heading', {
+                name: 'Reset password',
+            }),
+        ).toBeInTheDocument();
+
+        expect(screen.getByLabelText('Email')).toHaveValue('user@test.com');
+
+        expect(screen.getByLabelText('New password')).toBeInTheDocument();
+
+        expect(
+            screen.getByLabelText('Confirm new password'),
+        ).toBeInTheDocument();
+    });
+
     test('redirects an unauthenticated dashboard request to login', () => {
         renderAppRoutes({
             initialEntries: ['/dashboard'],
@@ -69,7 +91,7 @@ describe('Application routes', () => {
         renderAppRoutes({
             initialEntries: ['/'],
             user: {
-                id: 1,
+                id: '44444444-4444-4444-8444-444444444444',
                 name: 'System Admin',
                 role: 'admin',
             },
@@ -87,7 +109,7 @@ describe('Application routes', () => {
         renderAppRoutes({
             initialEntries: ['/dashboard'],
             user: {
-                id: 1,
+                id: '44444444-4444-4444-8444-444444444444',
                 name: 'System Admin',
                 role: 'admin',
             },
@@ -123,7 +145,7 @@ describe('Application routes', () => {
         renderAppRoutes({
             initialEntries: ['/users'],
             user: {
-                id: 1,
+                id: '44444444-4444-4444-8444-444444444444',
                 name: 'System Admin',
                 role: 'admin',
             },
@@ -141,7 +163,7 @@ describe('Application routes', () => {
         renderAppRoutes({
             initialEntries: ['/users'],
             user: {
-                id: 2,
+                id: '22222222-2222-4222-8222-222222222222',
                 name: 'Team Manager',
                 role: 'manager',
             },
@@ -163,7 +185,7 @@ describe('Application routes', () => {
         renderAppRoutes({
             initialEntries: ['/teams'],
             user: {
-                id: 3,
+                id: '33333333-3333-4333-8333-333333333333',
                 name: 'Team Member',
                 role: 'team_member',
             },
@@ -181,7 +203,7 @@ describe('Application routes', () => {
         renderAppRoutes({
             initialEntries: ['/analytics'],
             user: {
-                id: 3,
+                id: '33333333-3333-4333-8333-333333333333',
                 name: 'Team Member',
                 role: 'team_member',
             },

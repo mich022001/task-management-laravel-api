@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../hooks/useAuth.js';
 
@@ -18,10 +18,11 @@ export default function Login() {
     const navigate = useNavigate();
 
     const [form, setForm] = useState({
-        email: 'admin@test.com',
-        password: 'password123',
+        email: '',
+        password: '',
     });
 
+    const [showPassword, setShowPassword] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -95,15 +96,36 @@ export default function Login() {
 
                     <label>
                         Password
-                        <input
-                            type="password"
-                            name="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            autoComplete="current-password"
-                            required
-                        />
+                        <div className="password-input-group">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                name="password"
+                                value={form.password}
+                                onChange={handleChange}
+                                autoComplete="current-password"
+                                required
+                            />
+
+                            <button
+                                type="button"
+                                className="secondary-button password-toggle"
+                                onClick={() =>
+                                    setShowPassword(
+                                        (currentValue) => !currentValue,
+                                    )
+                                }
+                                aria-label={
+                                    showPassword
+                                        ? 'Hide password'
+                                        : 'Show password'
+                                }
+                            >
+                                {showPassword ? 'Hide' : 'Show'}
+                            </button>
+                        </div>
                     </label>
+
+                    <Link to="/forgot-password">Forgot your password?</Link>
 
                     {errorMessage ? (
                         <p className="error-message" role="alert">

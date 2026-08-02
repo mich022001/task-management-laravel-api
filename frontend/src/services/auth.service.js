@@ -23,3 +23,20 @@ export async function refreshAccessToken() {
 
     return response.data;
 }
+
+export async function requestPasswordReset(email) {
+    const response = await laravelClient.post('/auth/forgot-password', {
+        email,
+    });
+
+    return response.data;
+}
+
+export async function resetPassword(credentials) {
+    const response = await laravelClient.post(
+        '/auth/reset-password',
+        credentials,
+    );
+
+    return response.data;
+}
