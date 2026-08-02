@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Http\Controllers\Api\Internal;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\TaskResource;
+use App\Models\Task;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class TaskController extends Controller
+{
+    public function index(Request $request): JsonResponse
+    {
+        $perPage = min(
+            max($request->integer('per_page', 15), 1),
+            100,
+        );
+
+        $tasks = Task::query()
+            ->with([
+                'team.creator',
+                'assignee',
+                'creator',
+            ])
+            ->when(
+                $request->filled('status'),
+                fn ($query) => $query->where(
+                    'status',
+                    $request->string('status')->toString(),
+                ),
+            )
+            ->when(
+                $request->filled('priority'),
+                fn ($query) => $query->where(
+                    'priority',
+                    $request->string('priority')->toString(),
+                ),
+            )
+            ->when(
+                $request->filled('team_id'),
+                fn ($query) => $query->where(
+                    'team_id',
+                    $request->integer('team_id'),
+                ),
+            )
+            ->when(
+                $request->filled('assigned_to'),
+                fn ($query) => $query->where(
+                    'assigned_to',
+                    $request->integer('assigned_to'),
+                ),
+            )
+            ->latest()
+            ->paginate($perPage);
+
+        return response()->json([
+            'message' => 'Internal tasks retrieved successfully.',
+            'data' => TaskResource::collection($tasks->items()),
+            'meta' => [
+                'current_page' => $tasks->currentPage(),
+                'per_page' => $tasks->perPage(),
+                'total' => $tasks->total(),
+                'last_page' => $tasks->lastPage(),
+            ],
+        ]);
+    }
+
+    public function show(Task $task): JsonResponse
+    {
+        $task->load([
+            'team.creator',
+            'assignee',
+            'creator',
+            'statusHistories.changedBy',
+        ]);
+
+        return response()->json([
+            'message' => 'Internal task retrieved successfully.',
+            'data' => [
+                'task' => new TaskResource($task),
+            ],
+        ]);
+    }
+}

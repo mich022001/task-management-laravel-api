@@ -32,17 +32,6 @@ Route::middleware([
     'auth:api',
     'active',
 ])->group(function () {
-    /*
-    |--------------------------------------------------------------------------
-    | Task Management
-    |--------------------------------------------------------------------------
-    |
-    | All active authenticated users may enter this route group.
-    | TaskPolicy and query scoping determine which task records each role
-    | can view, update, delete, or transition.
-    |
-    */
-
     Route::get('/tasks', [TaskController::class, 'index']);
     Route::post('/tasks', [TaskController::class, 'store']);
     Route::get('/tasks/{task}', [TaskController::class, 'show']);
@@ -54,22 +43,12 @@ Route::middleware([
         TaskStatusController::class,
     );
 
-    /*
-    |--------------------------------------------------------------------------
-    | User and Team Management
-    |--------------------------------------------------------------------------
-    |
-    | Only Admins and Managers may access these management endpoints.
-    | Policies enforce record-level restrictions within the controllers and
-    | Form Requests.
-    |
-    */
-
     Route::middleware('role:admin,manager')->group(function () {
         Route::get('/users', [UserController::class, 'index']);
         Route::post('/users', [UserController::class, 'store']);
         Route::get('/users/{user}', [UserController::class, 'show']);
         Route::patch('/users/{user}', [UserController::class, 'update']);
+
         Route::patch(
             '/users/{user}/status',
             UserStatusController::class,
@@ -90,3 +69,16 @@ Route::middleware([
         );
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Internal service routes
+|--------------------------------------------------------------------------
+|
+| These endpoints use service-to-service authentication through the
+| X-Service-Key header. They do not require a user JWT.
+|
+*/
+
+Route::prefix('internal')
+    ->group(base_path('routes/api/internal.php'));
