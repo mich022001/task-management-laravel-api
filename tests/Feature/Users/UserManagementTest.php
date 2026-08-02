@@ -173,4 +173,27 @@ class UserManagementTest extends TestCase
 
         $response->assertForbidden();
     }
+
+    public function test_new_user_defaults_to_active_when_status_is_omitted(): void
+    {
+        $manager = User::factory()->manager()->create();
+
+        $response = $this
+            ->actingAs($manager, 'api')
+            ->postJson('/api/v1/users', [
+                'name' => 'Default Active Member',
+                'email' => 'default.active@example.com',
+                'password' => 'password123',
+                'role' => 'team_member',
+            ]);
+
+        $response
+            ->assertCreated()
+            ->assertJsonPath('data.user.is_active', true);
+
+        $this->assertDatabaseHas('users', [
+           'email' => 'default.active@example.com',
+           'is_active' => true,
+        ]);
+    }
 }

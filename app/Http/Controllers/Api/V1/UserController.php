@@ -95,15 +95,19 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): JsonResponse
     {
-        $user = User::query()->create($request->validated());
+        $validated = $request->validated();
+
+        $validated['is_active'] ??= true;
+
+        $user = User::query()->create($validated);
 
         return response()->json([
             'message' => 'User created successfully.',
             'data' => [
-                'user' => new UserResource($user),
+                'user' => new UserResource($user->fresh()),
             ],
         ], 201);
-    }
+    } 
 
     /**
      * Display a user.
