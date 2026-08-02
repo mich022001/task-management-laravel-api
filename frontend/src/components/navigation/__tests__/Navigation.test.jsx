@@ -1,0 +1,95 @@
+import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, test } from 'vitest';
+
+import { AuthContext } from '../../../context/auth-context.js';
+import Navigation from '../Navigation.jsx';
+
+function renderNavigation(user) {
+    return render(
+        <AuthContext.Provider
+            value={{
+                user,
+                isAuthenticated: true,
+                isInitializing: false,
+                login: async () => {},
+                logout: () => {},
+            }}
+        >
+            <MemoryRouter>
+                <Navigation />
+            </MemoryRouter>
+        </AuthContext.Provider>,
+    );
+}
+
+describe('Role-aware navigation', () => {
+    test('admin sees every navigation item', () => {
+        renderNavigation({
+            id: 1,
+            role: 'admin',
+        });
+
+        expect(
+            screen.getByRole('link', { name: 'Dashboard' }),
+        ).toBeInTheDocument();
+
+        expect(screen.getByRole('link', { name: 'Tasks' })).toBeInTheDocument();
+
+        expect(screen.getByRole('link', { name: 'Teams' })).toBeInTheDocument();
+
+        expect(screen.getByRole('link', { name: 'Users' })).toBeInTheDocument();
+
+        expect(
+            screen.getByRole('link', { name: 'Analytics' }),
+        ).toBeInTheDocument();
+    });
+
+    test('manager does not see the Users link', () => {
+        renderNavigation({
+            id: 2,
+            role: 'manager',
+        });
+
+        expect(
+            screen.getByRole('link', { name: 'Dashboard' }),
+        ).toBeInTheDocument();
+
+        expect(screen.getByRole('link', { name: 'Tasks' })).toBeInTheDocument();
+
+        expect(screen.getByRole('link', { name: 'Teams' })).toBeInTheDocument();
+
+        expect(
+            screen.getByRole('link', { name: 'Analytics' }),
+        ).toBeInTheDocument();
+
+        expect(
+            screen.queryByRole('link', { name: 'Users' }),
+        ).not.toBeInTheDocument();
+    });
+
+    test('team member sees only Dashboard and Tasks', () => {
+        renderNavigation({
+            id: 3,
+            role: 'team_member',
+        });
+
+        expect(
+            screen.getByRole('link', { name: 'Dashboard' }),
+        ).toBeInTheDocument();
+
+        expect(screen.getByRole('link', { name: 'Tasks' })).toBeInTheDocument();
+
+        expect(
+            screen.queryByRole('link', { name: 'Teams' }),
+        ).not.toBeInTheDocument();
+
+        expect(
+            screen.queryByRole('link', { name: 'Users' }),
+        ).not.toBeInTheDocument();
+
+        expect(
+            screen.queryByRole('link', { name: 'Analytics' }),
+        ).not.toBeInTheDocument();
+    });
+});
