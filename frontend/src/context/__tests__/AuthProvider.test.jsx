@@ -11,11 +11,13 @@ import {
 
 const loginUserMock = vi.fn();
 const getAuthenticatedUserMock = vi.fn();
+const logoutUserMock = vi.fn();
 
 vi.mock('../../services/auth.service.js', () => ({
     loginUser: (...arguments_) => loginUserMock(...arguments_),
     getAuthenticatedUser: (...arguments_) =>
         getAuthenticatedUserMock(...arguments_),
+    logoutUser: (...arguments_) => logoutUserMock(...arguments_),
 }));
 
 function wrapper({ children }) {
@@ -26,6 +28,11 @@ describe('AuthProvider', () => {
     beforeEach(() => {
         loginUserMock.mockReset();
         getAuthenticatedUserMock.mockReset();
+        logoutUserMock.mockReset();
+
+        logoutUserMock.mockResolvedValue({
+            message: 'Logout successful.',
+        });
     });
 
     test('starts unauthenticated when no token exists', () => {
@@ -164,10 +171,11 @@ describe('AuthProvider', () => {
             });
         });
 
-        act(() => {
-            result.current.logout();
+        await act(async () => {
+            await result.current.logout();
         });
 
+        expect(logoutUserMock).toHaveBeenCalledTimes(1);
         expect(getAccessToken()).toBeNull();
         expect(result.current.user).toBeNull();
         expect(result.current.isAuthenticated).toBe(false);
@@ -254,4 +262,43 @@ describe('AuthProvider', () => {
         expect(result.current.user).toBeNull();
         expect(result.current.isAuthenticated).toBe(false);
     });
+
+    test('clears the local session when the logout API fails', async () => {
+        loginUserMock.mockResolvedValue({
+            data: {
+                user: {
+                    id: 1,
+                    name: 'System Admin',
+                    role: 'admin',
+                },
+                access_token: 'admin-jwt-token',
+            },
+        });
+
+        logoutUserMock.mockRejectedValue(
+            new Error('Logout service unavailable.'),
+        );
+
+        const { result } = renderHook(() => useAuth(), {
+            wrapper,
+        });
+
+        await act(async () => {
+            await result.current.login({
+                email: 'admin@test.com',
+                password: 'password123',
+            });
+        });
+
+        await act(async () => {
+            await result.current.logout();
+        });
+
+        expect(logoutUserMock).toHaveBeenCalledTimes(1);
+        expect(getAccessToken()).toBeNull();
+        expect(result.current.user).toBeNull();
+        expect(result.current.isAuthenticated).toBe(false);
+    });
+
+
 });

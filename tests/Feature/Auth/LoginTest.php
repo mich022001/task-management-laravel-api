@@ -10,6 +10,23 @@ class LoginTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function resetApiGuard(): void
+    {
+        auth()->forgetGuards();
+
+        if (app()->bound('tymon.jwt.auth')) {
+            app('tymon.jwt.auth')->unsetToken();
+        }
+
+        if (app()->bound('tymon.jwt.manager')) {
+            app()->forgetInstance('tymon.jwt.manager');
+        }
+
+        if (app()->bound('tymon.jwt.auth')) {
+            app()->forgetInstance('tymon.jwt.auth');
+        }
+    }
+
     public function test_active_user_can_login(): void
     {
         User::factory()->create([
@@ -111,5 +128,165 @@ class LoginTest extends TestCase
         $response = $this->getJson('/api/v1/auth/me');
 
         $response->assertUnauthorized();
+    }
+
+    public function test_login_is_rate_limited_after_five_attempts(): void
+    {
+        User::factory()->create([
+            'email' => 'limited@test.com',
+            'password' => 'password123',
+        ]);
+
+        for ($attempt = 1; $attempt <= 5; $attempt++) {
+            $this
+                ->postJson('/api/v1/auth/login', [
+                    'email' => 'limited@test.com',
+                    'password' => 'incorrect-password',
+                ])
+                ->assertUnauthorized();
+        }
+
+        $this
+            ->postJson('/api/v1/auth/login', [
+                'email' => 'limited@test.com',
+                'password' => 'incorrect-password',
+            ])
+            ->assertTooManyRequests()
+            ->assertJsonPath(
+                'message',
+                'Too many login attempts. Please try again later.',
+            );
+    }
+
+    public function test_logout_invalidates_current_token(): void
+    {
+        User::factory()->create([
+            'email' => 'logout@test.com',
+            'password' => 'password123',
+            'is_active' => true,
+        ]);
+
+        $loginResponse = $this->postJson('/api/v1/auth/login', [
+            'email' => 'logout@test.com',
+            'password' => 'password123',
+        ]);
+
+        $token = $loginResponse->json('data.access_token');
+
+        $this
+            ->withToken($token)
+            ->postJson('/api/v1/auth/logout')
+            ->assertOk()
+            ->assertJsonPath('message', 'Logout successful.');
+
+        $this
+            ->withToken($token)
+            ->getJson('/api/v1/auth/me')
+            ->assertUnauthorized();
+    }
+
+    public function test_refresh_returns_a_valid_rotated_token(): void
+    {
+        User::factory()->create([
+            'email' => 'refresh@test.com',
+            'password' => 'password123',
+            'is_active' => true,
+        ]);
+
+        $loginResponse = $this->postJson('/api/v1/auth/login', [
+            'email' => 'refresh@test.com',
+            'password' => 'password123',
+        ]);
+
+        $oldToken = $loginResponse->json('data.access_token');
+
+        $refreshResponse = $this
+            ->withToken($oldToken)
+            ->postJson('/api/v1/auth/refresh');
+
+        $refreshResponse
+            ->assertOk()
+            ->assertJsonPath('message', 'Token refreshed successfully.')
+            ->assertJsonStructure([
+                'message',
+                'data' => [
+                    'user',
+                    'access_token',
+                    'token_type',
+                    'expires_in',
+                ],
+            ]);
+
+        $newToken = $refreshResponse->json('data.access_token');
+
+        $this->assertNotSame($oldToken, $newToken);
+
+        $this->resetApiGuard();
+
+        $authenticatedUser = auth('api')
+            ->setToken($newToken)
+            ->user();
+
+        $this->assertNotNull($authenticatedUser);
+        $this->assertSame(
+            'refresh@test.com',
+            $authenticatedUser->email,
+        );
+    }
+
+    public function test_refresh_invalidates_the_previous_token(): void
+    {
+        User::factory()->create([
+            'email' => 'rotation@test.com',
+            'password' => 'password123',
+            'is_active' => true,
+        ]);
+
+        $loginResponse = $this->postJson('/api/v1/auth/login', [
+            'email' => 'rotation@test.com',
+            'password' => 'password123',
+        ]);
+
+        $oldToken = $loginResponse->json('data.access_token');
+
+        $this
+            ->withToken($oldToken)
+            ->postJson('/api/v1/auth/refresh')
+            ->assertOk();
+
+        $this->resetApiGuard();
+
+        $this
+            ->withToken($oldToken)
+            ->getJson('/api/v1/auth/me')
+            ->assertUnauthorized();
+    }
+
+    public function test_inactive_user_cannot_refresh_existing_token(): void
+    {
+        $user = User::factory()->create([
+            'email' => 'deactivated@test.com',
+            'password' => 'password123',
+            'is_active' => true,
+        ]);
+
+        $loginResponse = $this->postJson('/api/v1/auth/login', [
+            'email' => 'deactivated@test.com',
+            'password' => 'password123',
+        ]);
+
+        $token = $loginResponse->json('data.access_token');
+
+        $user->update([
+            'is_active' => false,
+        ]);
+
+        $this->resetApiGuard();
+
+        $this
+            ->withToken($token)
+            ->postJson('/api/v1/auth/refresh')
+            ->assertForbidden()
+            ->assertJsonPath('message', 'Your account is inactive.');
     }
 }

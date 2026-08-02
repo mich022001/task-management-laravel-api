@@ -11,3 +11,15 @@ export async function getAuthenticatedUser() {
 
     return response.data;
 }
+
+export async function logoutUser() {
+    const response = await laravelClient.post('/auth/logout');
+
+    return response.data;
+}
+
+export async function refreshAccessToken() {
+    const response = await laravelClient.post('/auth/refresh');
+
+    return response.data;
+}

@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getAuthenticatedUser, loginUser } from '../services/auth.service.js';
+import {
+    getAuthenticatedUser,
+    loginUser,
+    logoutUser,
+} from '../services/auth.service.js';
 import {
     AUTH_UNAUTHORIZED_EVENT,
     clearAccessToken,
@@ -115,10 +119,19 @@ export function AuthProvider({ children }) {
         return authenticatedUser;
     }, []);
 
-    const logout = useCallback(() => {
-        clearAccessToken();
-        setUser(null);
-        setIsInitializing(false);
+    const logout = useCallback(async () => {
+        try {
+            if (getAccessToken()) {
+                await logoutUser();
+            }
+        } catch {
+            // Local authentication must still be cleared when the
+            // token is already expired, invalid, or the API is unavailable.
+        } finally {
+            clearAccessToken();
+            setUser(null);
+            setIsInitializing(false);
+        }
     }, []);
 
     const value = useMemo(
