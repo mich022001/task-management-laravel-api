@@ -17,7 +17,21 @@ class TeamController extends Controller
             100,
         );
 
+        $userId = $request->integer('user_id');
+
         $teams = Team::query()
+            ->when(
+                $userId > 0,
+                fn ($query) => $query->where(
+                    fn ($teamQuery) => $teamQuery
+                        ->where('created_by', $userId)
+                        ->orWhereHas(
+                            'members',
+                            fn ($memberQuery) => $memberQuery
+                                ->where('users.id', $userId),
+                        ),
+                ),
+            )
             ->with('creator')
             ->withCount([
                 'members',

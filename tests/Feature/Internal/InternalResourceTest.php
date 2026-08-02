@@ -158,4 +158,51 @@ class InternalResourceTest extends TestCase
                 ],
             ]);
     }
+
+    public function test_internal_teams_endpoint_can_filter_by_user_membership(): void
+    {
+        $manager = User::factory()->create([
+            'role' => 'manager',
+        ]);
+
+        $otherManager = User::factory()->create([
+            'role' => 'manager',
+        ]);
+
+        $createdTeam = Team::factory()->create([
+            'created_by' => $manager->id,
+        ]);
+
+        $joinedTeam = Team::factory()->create([
+            'created_by' => $otherManager->id,
+        ]);
+
+        $unrelatedTeam = Team::factory()->create([
+            'created_by' => $otherManager->id,
+        ]);
+
+        $joinedTeam->members()->attach($manager->id, [
+            'member_role' => 'member',
+        ]);
+
+        $response = $this
+            ->withHeader('X-Service-Key', $this->serviceKey)
+            ->getJson(
+                "/api/v1/internal/teams?user_id={$manager->id}&per_page=100",
+            );
+
+        $response
+            ->assertOk()
+            ->assertJsonPath(
+                'message',
+                'Internal teams retrieved successfully.',
+            );
+
+        $teamIds = collect($response->json('data'))
+            ->pluck('id');
+
+        $this->assertTrue($teamIds->contains($createdTeam->id));
+        $this->assertTrue($teamIds->contains($joinedTeam->id));
+        $this->assertFalse($teamIds->contains($unrelatedTeam->id));
+    }
 }
