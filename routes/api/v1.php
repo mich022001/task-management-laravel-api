@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\TeamController;
+use App\Http\Controllers\Api\V1\TeamMemberController;
+use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\UserStatusController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/ping', function () {
@@ -20,4 +24,30 @@ Route::prefix('auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
     });
+});
+
+Route::middleware([
+    'auth:api',
+    'active',
+    'role:admin,manager',
+])->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::get('/users/{user}', [UserController::class, 'show']);
+    Route::patch('/users/{user}', [UserController::class, 'update']);
+    Route::patch('/users/{user}/status', UserStatusController::class);
+
+    Route::get('/teams', [TeamController::class, 'index']);
+    Route::post('/teams', [TeamController::class, 'store']);
+    Route::get('/teams/{team}', [TeamController::class, 'show']);
+
+    Route::post(
+        '/teams/{team}/members',
+        [TeamMemberController::class, 'store'],
+    );
+
+    Route::delete(
+        '/teams/{team}/members/{user}',
+        [TeamMemberController::class, 'destroy'],
+    );
 });
