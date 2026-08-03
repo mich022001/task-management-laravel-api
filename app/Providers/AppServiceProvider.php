@@ -37,6 +37,20 @@ class AppServiceProvider extends ServiceProvider
                     ], 429);
                 });
         });
+
+        RateLimiter::for('registration', function (Request $request): Limit {
+            $email = Str::lower(
+                (string) $request->input('email'),
+            );
+
+            return Limit::perMinute(3)
+                ->by($email.'|'.$request->ip())
+                ->response(function () {
+                    return response()->json([
+                        'message' => 'Too many registration attempts. Please try again later.',
+                    ], 429);
+                });
+        });
     }
 
     private function configurePasswordResetUrl(): void

@@ -27,6 +27,7 @@ export default function Login() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const destination = location.state?.from?.pathname ?? '/dashboard';
+    const successMessage = location.state?.successMessage ?? '';
 
     function handleChange(event) {
         const { name, value } = event.target;
@@ -73,7 +74,7 @@ export default function Login() {
             <section className="login-card">
                 <div>
                     <p className="eyebrow">Task Management Platform</p>
-
+                    <h1>Sign in</h1>
                 </div>
 
                 <form className="login-form" onSubmit={handleSubmit}>
@@ -120,7 +121,17 @@ export default function Login() {
                         </div>
                     </label>
 
-                    <Link to="/forgot-password">Forgot your password?</Link>
+                    <div className="auth-links">
+                        <Link to="/forgot-password">Forgot your password?</Link>
+
+                        <Link to="/register">Create an account</Link>
+                    </div>
+
+                    {successMessage ? (
+                        <p className="success-message" role="status">
+                            {successMessage}
+                        </p>
+                    ) : null}
 
                     {errorMessage ? (
                         <p className="error-message" role="alert">

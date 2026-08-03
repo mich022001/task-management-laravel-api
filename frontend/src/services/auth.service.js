@@ -40,3 +40,9 @@ export async function resetPassword(credentials) {
 
     return response.data;
 }
+
+export async function registerUser(payload) {
+    const response = await laravelClient.post('/auth/register', payload);
+
+    return response.data;
+}

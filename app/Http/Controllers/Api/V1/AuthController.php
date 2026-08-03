@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use PHPOpenSourceSaver\JWTAuth\JWTGuard;
 
@@ -106,5 +108,28 @@ class AuthController extends Controller
                 'expires_in' => $guard->factory()->getTTL() * 60,
             ],
         ]);
+    }
+
+    /**
+     * Register a pending Team Member account.
+     */
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $user = User::query()->create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role' => 'team_member',
+            'is_active' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Registration successful. Your account is pending administrator approval.',
+            'data' => [
+                'user' => new UserResource($user),
+            ],
+        ], 201);
     }
 }
