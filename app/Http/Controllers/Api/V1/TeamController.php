@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\StoreTeamRequest;
+use App\Http\Requests\Team\UpdateTeamRequest;
 use App\Http\Resources\TeamResource;
 use App\Models\Team;
 use App\Models\User;
@@ -127,6 +128,59 @@ class TeamController extends Controller
                 'team' => new TeamResource($team),
             ],
         ], 201);
+    }
+
+    /**
+     * Update a team and its assigned operational manager.
+     */
+    public function update(
+        UpdateTeamRequest $request,
+        Team $team,
+    ): JsonResponse {
+        $validated = $request->validated();
+
+        $manager = User::query()
+            ->where('uuid', $validated['manager_id'])
+            ->where('role', 'manager')
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        DB::transaction(function () use ($team, $validated, $manager) {
+            $team->update([
+                'name' => $validated['name'],
+            ]);
+
+            DB::table('team_members')
+                ->where('team_id', $team->id)
+                ->where('member_role', 'lead')
+                ->update([
+                    'member_role' => 'member',
+                    'updated_at' => now(),
+                ]);
+
+            $team->members()->syncWithoutDetaching([
+                $manager->id => [
+                    'member_role' => 'lead',
+                ],
+            ]);
+        });
+
+        $team
+            ->load([
+                'creator',
+                'members',
+            ])
+            ->loadCount([
+                'members',
+                'tasks',
+            ]);
+
+        return response()->json([
+            'message' => 'Team updated successfully.',
+            'data' => [
+                'team' => new TeamResource($team),
+            ],
+        ]);
     }
 
     /**

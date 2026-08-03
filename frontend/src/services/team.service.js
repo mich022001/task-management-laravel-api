@@ -20,6 +20,15 @@ export async function createTeam(credentials) {
     return response.data;
 }
 
+<<<<<<< HEAD
+=======
+export async function updateTeam(teamId, credentials) {
+    const response = await laravelClient.patch(`/teams/${teamId}`, credentials);
+
+    return response.data;
+}
+
+>>>>>>> db23007 (feat(users): implement user management screens)
 export async function addTeamMember(teamId, membership) {
     const response = await laravelClient.post(
         `/teams/${teamId}/members`,

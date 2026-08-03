@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export default function TeamForm({
     managers,
+<<<<<<< HEAD
     isSubmitting,
     validationErrors = {},
     onSubmit,
@@ -11,6 +12,20 @@ export default function TeamForm({
         name: '',
         manager_id: '',
     });
+=======
+    initialValues = {
+        name: '',
+        manager_id: '',
+    },
+    isSubmitting,
+    validationErrors = {},
+    submitLabel = 'Create team',
+    submittingLabel = 'Creating...',
+    onSubmit,
+    onCancel,
+}) {
+    const [form, setForm] = useState(initialValues);
+>>>>>>> db23007 (feat(users): implement user management screens)
 
     function handleChange(event) {
         const { name, value } = event.target;
@@ -100,7 +115,11 @@ export default function TeamForm({
                     className="primary-button"
                     disabled={isSubmitting || managers.length === 0}
                 >
+<<<<<<< HEAD
                     {isSubmitting ? 'Creating...' : 'Create team'}
+=======
+                    {isSubmitting ? submittingLabel : submitLabel}
+>>>>>>> db23007 (feat(users): implement user management screens)
                 </button>
 
                 <button

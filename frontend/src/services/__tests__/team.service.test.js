@@ -7,12 +7,20 @@ import {
     getTeam,
     listTeams,
     removeTeamMember,
+<<<<<<< HEAD
+=======
+    updateTeam,
+>>>>>>> db23007 (feat(users): implement user management screens)
 } from '../team.service.js';
 
 vi.mock('../../api/laravelClient.js', () => ({
     default: {
         get: vi.fn(),
         post: vi.fn(),
+<<<<<<< HEAD
+=======
+        patch: vi.fn(),
+>>>>>>> db23007 (feat(users): implement user management screens)
         delete: vi.fn(),
     },
 }));
@@ -97,6 +105,39 @@ describe('team service', () => {
         expect(response).toEqual(payload);
     });
 
+<<<<<<< HEAD
+=======
+    test('updates a team', async () => {
+        const credentials = {
+            name: 'Updated Engineering',
+            manager_id: 'manager-uuid',
+        };
+
+        const payload = {
+            message: 'Team updated successfully.',
+            data: {
+                team: {
+                    id: 'team-uuid',
+                    name: credentials.name,
+                },
+            },
+        };
+
+        laravelClient.patch.mockResolvedValue({
+            data: payload,
+        });
+
+        const response = await updateTeam('team-uuid', credentials);
+
+        expect(laravelClient.patch).toHaveBeenCalledWith(
+            '/teams/team-uuid',
+            credentials,
+        );
+
+        expect(response).toEqual(payload);
+    });
+
+>>>>>>> db23007 (feat(users): implement user management screens)
     test('adds a member to a team', async () => {
         const membership = {
             user_id: 'user-uuid',

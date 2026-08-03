@@ -86,6 +86,7 @@ Route::middleware([
         Route::get('/teams', [TeamController::class, 'index']);
         Route::post('/teams', [TeamController::class, 'store']);
         Route::get('/teams/{team}', [TeamController::class, 'show']);
+        Route::patch('/teams/{team}', [TeamController::class, 'update']);
 
         Route::post(
             '/teams/{team}/members',
