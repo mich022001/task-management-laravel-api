@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
 import Navigation from '../navigation/Navigation.jsx';
+import NotificationBell from '../notifications/NotificationBell.jsx';
 import AppLogo from '../ui/AppLogo.jsx';
 import Icon from '../ui/Icon.jsx';
 import SidebarProfile from './SidebarProfile.jsx';
@@ -91,6 +92,8 @@ export default function AppLayout() {
                         <span>Workspace</span>
                         <strong>Task Management Platform</strong>
                     </div>
+
+                    <NotificationBell />
                 </header>
 
                 <header className="mobile-application-header">
@@ -109,6 +112,8 @@ export default function AppLayout() {
                         <strong>Task Management</strong>
                         <span>Workspace</span>
                     </div>
+
+                    <NotificationBell />
                 </header>
 
                 <main className="page-content">
