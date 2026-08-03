@@ -20,12 +20,9 @@ class TaskTransitionService
         'in_progress' => [
             'pending',
             'completed',
-            'cancelled',
         ],
         'completed' => [],
-        'cancelled' => [
-            'pending',
-        ],
+        'cancelled' => [],
     ];
 
     /**

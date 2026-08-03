@@ -38,7 +38,6 @@ class TaskStatusTest extends TestCase
             ->assertJsonPath('data.task.allowed_transitions', [
                 'pending',
                 'completed',
-                'cancelled',
             ]);
 
         $this->assertDatabaseHas('task_status_histories', [
@@ -192,5 +191,65 @@ class TaskStatusTest extends TestCase
         ]);
 
         $this->assertDatabaseCount('task_status_histories', 0);
+    }
+
+    public function test_in_progress_task_cannot_transition_to_cancelled(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $task = Task::factory()->create([
+            'status' => 'in_progress',
+            'completed_at' => null,
+        ]);
+
+        $response = $this
+            ->actingAs($admin, 'api')
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
+                'status' => 'cancelled',
+            ]);
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('status');
+
+        $this->assertDatabaseHas('tasks', [
+            'id' => $task->id,
+            'status' => 'in_progress',
+        ]);
+
+        $this->assertDatabaseMissing('task_status_histories', [
+            'task_id' => $task->id,
+            'new_status' => 'cancelled',
+        ]);
+    }
+
+    public function test_cancelled_task_cannot_transition_to_pending(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $task = Task::factory()->create([
+            'status' => 'cancelled',
+            'completed_at' => null,
+        ]);
+
+        $response = $this
+            ->actingAs($admin, 'api')
+            ->patchJson("/api/v1/tasks/{$task->uuid}/status", [
+                'status' => 'pending',
+            ]);
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('status');
+
+        $this->assertDatabaseHas('tasks', [
+            'id' => $task->id,
+            'status' => 'cancelled',
+        ]);
+
+        $this->assertDatabaseMissing('task_status_histories', [
+            'task_id' => $task->id,
+            'new_status' => 'pending',
+        ]);
     }
 }

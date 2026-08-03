@@ -84,6 +84,54 @@ class TeamPolicy
             ->exists();
     }
 
+    /**
+     * Determine whether the user may list tasks belonging to the team.
+     */
+    public function viewTasks(User $user, Team $team): bool
+    {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        if ($user->role === 'manager') {
+            return $team->created_by === $user->id
+                || $team->members()
+                    ->where('users.id', $user->id)
+                    ->exists();
+        }
+
+        if ($user->role === 'team_member') {
+            return $team->members()
+                ->where('users.id', $user->id)
+                ->exists();
+        }
+
+        return false;
+    }
+
+    /**
+     * Determine whether the user may create tasks for the team.
+     */
+    public function createTask(User $user, Team $team): bool
+    {
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        if ($user->role !== 'manager') {
+            return false;
+        }
+
+        if ($team->created_by === $user->id) {
+            return true;
+        }
+
+        return $team->members()
+            ->where('users.id', $user->id)
+            ->wherePivot('member_role', 'lead')
+            ->exists();
+    }
+
     public function restore(User $user, Team $team): bool
     {
         return false;

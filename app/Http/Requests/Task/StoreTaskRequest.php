@@ -12,7 +12,30 @@ class StoreTaskRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth('api')->user()?->can('create', Task::class) ?? false;
+        $user = auth('api')->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        $team = $this->route('team');
+
+        if ($team instanceof Team) {
+            return $user->can('createTask', $team);
+        }
+
+        return $user->can('create', Task::class);
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $team = $this->route('team');
+
+        if ($team instanceof Team) {
+            $this->merge([
+                'team_id' => $team->uuid,
+            ]);
+        }
     }
 
     public function rules(): array
