@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\TaskActivityController;
 use App\Http\Controllers\Api\V1\TaskCommentController;
@@ -70,6 +71,36 @@ Route::middleware([
     Route::get(
         '/tasks/{task}/activity',
         TaskActivityController::class,
+    );
+
+    Route::get(
+        '/notifications',
+        [NotificationController::class, 'index'],
+    );
+
+    Route::get(
+        '/notifications/unread-count',
+        [NotificationController::class, 'unreadCount'],
+    );
+
+    Route::patch(
+        '/notifications/read-all',
+        [NotificationController::class, 'markAllAsRead'],
+    );
+
+    Route::delete(
+        '/notifications',
+        [NotificationController::class, 'clear'],
+    );
+
+    Route::patch(
+        '/notifications/{notification}/read',
+        [NotificationController::class, 'markAsRead'],
+    );
+
+    Route::delete(
+        '/notifications/{notification}',
+        [NotificationController::class, 'destroy'],
     );
 
     Route::middleware('role:admin,manager')->group(function () {

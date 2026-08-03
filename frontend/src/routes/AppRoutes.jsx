@@ -7,16 +7,13 @@ import CreateTeam from '../pages/CreateTeam.jsx';
 import CreateUser from '../pages/CreateUser.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import EditTask from '../pages/EditTask.jsx';
-<<<<<<< HEAD
-=======
 import EditTeam from '../pages/EditTeam.jsx';
->>>>>>> db23007 (feat(users): implement user management screens)
 import EditUser from '../pages/EditUser.jsx';
 import Forbidden from '../pages/Forbidden.jsx';
 import ForgotPassword from '../pages/ForgotPassword.jsx';
 import Login from '../pages/Login.jsx';
-import ResetPassword from '../pages/ResetPassword.jsx';
 import NotFound from '../pages/NotFound.jsx';
+import ResetPassword from '../pages/ResetPassword.jsx';
 import TaskDetails from '../pages/TaskDetails.jsx';
 import Tasks from '../pages/Tasks.jsx';
 import TeamDetails from '../pages/TeamDetails.jsx';
@@ -59,17 +56,16 @@ export default function AppRoutes() {
 
                         <Route path="/teams" element={<Teams />} />
                         <Route path="/teams/create" element={<CreateTeam />} />
+
                         <Route
                             path="/teams/:teamId"
                             element={<TeamDetails />}
                         />
-<<<<<<< HEAD
-=======
+
                         <Route
                             path="/teams/:teamId/edit"
                             element={<EditTeam />}
                         />
->>>>>>> db23007 (feat(users): implement user management screens)
 
                         <Route path="/analytics" element={<Analytics />} />
                     </Route>
@@ -77,6 +73,7 @@ export default function AppRoutes() {
                     <Route element={<RoleRoute allowedRoles={['admin']} />}>
                         <Route path="/users" element={<Users />} />
                         <Route path="/users/create" element={<CreateUser />} />
+
                         <Route
                             path="/users/:userId/edit"
                             element={<EditUser />}

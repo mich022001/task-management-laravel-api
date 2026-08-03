@@ -110,6 +110,14 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * In-app notifications belonging to the user.
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    /**
      * Use the UUID when resolving users from public routes.
      */
     public function getRouteKeyName(): string

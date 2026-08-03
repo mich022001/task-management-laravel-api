@@ -241,15 +241,6 @@ export default function TeamDetails() {
                 title={team?.name ?? 'Team Details'}
                 description="Review team ownership, membership, and assigned work."
                 actions={
-<<<<<<< HEAD
-                    <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={() => navigate('/teams')}
-                    >
-                        Back to Teams
-                    </button>
-=======
                     <div className="page-header-actions">
                         {canManageMembers ? (
                             <button
@@ -271,7 +262,6 @@ export default function TeamDetails() {
                             Back to Teams
                         </button>
                     </div>
->>>>>>> db23007 (feat(users): implement user management screens)
                 }
             />
 

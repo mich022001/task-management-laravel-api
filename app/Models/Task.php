@@ -78,4 +78,9 @@ class Task extends Model
     {
         return $this->hasMany(TaskActivityLog::class);
     }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
 }

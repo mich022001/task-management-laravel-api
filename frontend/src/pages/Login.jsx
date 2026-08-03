@@ -74,11 +74,6 @@ export default function Login() {
                 <div>
                     <p className="eyebrow">Task Management Platform</p>
 
-                    <h1>Sign in</h1>
-
-                    <p className="muted-text">
-                        Use your Laravel account to access the platform.
-                    </p>
                 </div>
 
                 <form className="login-form" onSubmit={handleSubmit}>
