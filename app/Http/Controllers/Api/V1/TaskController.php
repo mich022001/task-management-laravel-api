@@ -121,6 +121,19 @@ class TaskController extends Controller
         ]);
     }
 
+    public function indexByTeam(
+        Request $request,
+        Team $team,
+    ): JsonResponse {
+        Gate::authorize('viewTasks', $team);
+
+        $request->merge([
+            'team_id' => $team->uuid,
+        ]);
+
+        return $this->index($request);
+    }
+
     public function store(StoreTaskRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -182,6 +195,15 @@ class TaskController extends Controller
                 'task' => new TaskResource($task),
             ],
         ], 201);
+    }
+
+    public function storeForTeam(
+        StoreTaskRequest $request,
+        Team $team,
+    ): JsonResponse {
+        Gate::authorize('createTask', $team);
+
+        return $this->store($request);
     }
 
     public function show(Task $task): JsonResponse

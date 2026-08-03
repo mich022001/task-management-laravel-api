@@ -14,10 +14,27 @@ export default function TeamMemberForm({
     function handleChange(event) {
         const { name, value } = event.target;
 
-        setForm((currentForm) => ({
-            ...currentForm,
-            [name]: value,
-        }));
+        setForm((currentForm) => {
+            if (name === 'user_id') {
+                const selectedUser = eligibleUsers.find(
+                    (user) => user.id === value,
+                );
+
+                return {
+                    ...currentForm,
+                    user_id: value,
+                    member_role:
+                        selectedUser?.role === 'manager'
+                            ? currentForm.member_role
+                            : 'member',
+                };
+            }
+
+            return {
+                ...currentForm,
+                [name]: value,
+            };
+        });
     }
 
     function handleSubmit(event) {
@@ -28,6 +45,12 @@ export default function TeamMemberForm({
 
     const userErrors = validationErrors.user_id ?? [];
     const roleErrors = validationErrors.member_role ?? [];
+
+    const selectedUser = eligibleUsers.find(
+        (user) => user.id === form.user_id,
+    );
+
+    const canBeLead = selectedUser?.role === 'manager';
 
     return (
         <form className="task-form team-member-form" onSubmit={handleSubmit}>
@@ -77,7 +100,10 @@ export default function TeamMemberForm({
                         required
                     >
                         <option value="member">Member</option>
-                        <option value="lead">Lead</option>
+
+                        {canBeLead ? (
+                            <option value="lead">Lead</option>
+                        ) : null}
                     </select>
 
                     {roleErrors.length > 0 ? (

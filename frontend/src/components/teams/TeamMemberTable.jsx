@@ -94,7 +94,12 @@ export default function TeamMemberTable({
                                             <option value="member">
                                                 Member
                                             </option>
-                                            <option value="lead">Lead</option>
+
+                                            {member.role === 'manager' ? (
+                                                <option value="lead">
+                                                    Lead
+                                                </option>
+                                            ) : null}
                                         </select>
                                     ) : (
                                         formatMemberRole(member.member_role)
