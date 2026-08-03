@@ -103,6 +103,58 @@ class TeamMemberManagementTest extends TestCase
         ]);
     }
 
+    public function test_team_member_cannot_be_assigned_as_team_lead(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $member = User::factory()->teamMember()->create();
+
+        $team = Team::factory()->create([
+            'created_by' => $admin->id,
+        ]);
+
+        $response = $this
+            ->actingAs($admin, 'api')
+            ->postJson("/api/v1/teams/{$team->uuid}/members", [
+                'user_id' => $member->uuid,
+                'member_role' => 'lead',
+            ]);
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('user_id');
+
+        $this->assertDatabaseMissing('team_members', [
+            'team_id' => $team->id,
+            'user_id' => $member->id,
+            'member_role' => 'lead',
+        ]);
+    }
+
+    public function test_manager_can_be_assigned_as_team_lead(): void
+    {
+        $admin = User::factory()->admin()->create();
+        $manager = User::factory()->manager()->create();
+
+        $team = Team::factory()->create([
+            'created_by' => $admin->id,
+        ]);
+
+        $response = $this
+            ->actingAs($admin, 'api')
+            ->postJson("/api/v1/teams/{$team->uuid}/members", [
+                'user_id' => $manager->uuid,
+                'member_role' => 'lead',
+            ]);
+
+        $response->assertOk();
+
+        $this->assertDatabaseHas('team_members', [
+            'team_id' => $team->id,
+            'user_id' => $manager->id,
+            'member_role' => 'lead',
+        ]);
+    }
+
     public function test_non_lead_manager_cannot_manage_members(): void
     {
         $owner = User::factory()->manager()->create();

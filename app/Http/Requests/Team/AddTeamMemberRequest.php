@@ -22,9 +22,15 @@ class AddTeamMemberRequest extends FormRequest
                 'required',
                 'uuid',
                 Rule::exists('users', 'uuid')
-                    ->where(fn ($query) => $query
-                        ->where('is_active', true)
-                        ->whereNull('deleted_at')),
+                    ->where(function ($query) {
+                        $query
+                            ->where('is_active', true)
+                            ->whereNull('deleted_at');
+
+                        if ($this->input('member_role') === 'lead') {
+                            $query->where('role', 'manager');
+                        }
+                    }),
             ],
 
             'member_role' => [
@@ -45,5 +51,12 @@ class AddTeamMemberRequest extends FormRequest
                 'member_role' => 'member',
             ]);
         }
+    }
+
+    public function messages(): array
+    {
+        return [
+            'user_id.exists' => 'The selected user must be active. Only Manager accounts may be assigned as team leads.',
+        ];
     }
 }
