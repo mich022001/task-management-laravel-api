@@ -199,7 +199,7 @@ describe('CreateTask page', () => {
             name: 'Create Task',
         });
 
-        await user.type(screen.getByLabelText(/Title/), 'Existing task');
+        await user.type(await screen.findByLabelText(/Title/), 'Existing task');
         await user.selectOptions(screen.getByLabelText(/Priority/), 'medium');
         await user.selectOptions(
             screen.getByLabelText(/Assigned Team/),

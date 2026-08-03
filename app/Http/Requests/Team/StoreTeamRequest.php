@@ -22,6 +22,18 @@ class StoreTeamRequest extends FormRequest
                 'max:150',
                 Rule::unique('teams', 'name'),
             ],
+
+            'manager_id' => [
+                'required',
+                'uuid',
+                Rule::exists('users', 'uuid')
+                    ->where(
+                        fn ($query) => $query
+                            ->where('role', 'manager')
+                            ->where('is_active', true)
+                            ->whereNull('deleted_at'),
+                    ),
+            ],
         ];
     }
 }

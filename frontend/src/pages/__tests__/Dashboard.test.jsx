@@ -112,11 +112,32 @@ describe('Dashboard page', () => {
         expect(await screen.findByText('Total Tasks')).toBeInTheDocument();
     });
 
-    test('does not request restricted analytics for a team member', () => {
+    test('loads assigned-task analytics for a team member', async () => {
+        getTaskSummaryMock.mockResolvedValue({
+            data: {
+                total_tasks: 3,
+                status: {
+                    pending: 1,
+                    in_progress: 1,
+                    completed: 1,
+                    cancelled: 0,
+                },
+                completed_tasks: 1,
+                overdue_tasks: 0,
+                completion_rate: 33.33,
+            },
+        });
+
         renderDashboard('team_member');
 
-        expect(screen.getByText('Your assigned tasks')).toBeInTheDocument();
+        expect(
+            screen.getByText('Loading dashboard analytics...'),
+        ).toBeInTheDocument();
 
-        expect(getTaskSummaryMock).not.toHaveBeenCalled();
+        expect(await screen.findByText('Total Tasks')).toBeInTheDocument();
+        expect(screen.getByText('3')).toBeInTheDocument();
+
+        expect(getTaskSummaryMock).toHaveBeenCalledTimes(1);
+        expect(getTaskSummaryMock).toHaveBeenCalledWith();
     });
 });

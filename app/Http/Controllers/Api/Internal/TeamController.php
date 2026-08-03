@@ -17,18 +17,26 @@ class TeamController extends Controller
             100,
         );
 
-        $userId = $request->integer('user_id');
+        $userUuid = $request->string('user_id')->toString();
 
         $teams = Team::query()
             ->when(
-                $userId > 0,
+                $userUuid !== '',
                 fn ($query) => $query->where(
                     fn ($teamQuery) => $teamQuery
-                        ->where('created_by', $userId)
+                        ->whereHas(
+                            'creator',
+                            fn ($creatorQuery) => $creatorQuery->where(
+                                'uuid',
+                                $userUuid,
+                            ),
+                        )
                         ->orWhereHas(
                             'members',
-                            fn ($memberQuery) => $memberQuery
-                                ->where('users.id', $userId),
+                            fn ($memberQuery) => $memberQuery->where(
+                                'users.uuid',
+                                $userUuid,
+                            ),
                         ),
                 ),
             )

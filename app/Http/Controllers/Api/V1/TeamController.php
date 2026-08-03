@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Team\StoreTeamRequest;
 use App\Http\Resources\TeamResource;
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -80,23 +81,30 @@ class TeamController extends Controller
     }
 
     /**
-     * Create a team and assign its creator as team lead.
+     * Create a team and assign the selected manager as team lead.
      */
     public function store(StoreTeamRequest $request): JsonResponse
     {
         $currentUser = auth('api')->user();
         $validated = $request->validated();
 
+        $manager = User::query()
+            ->where('uuid', $validated['manager_id'])
+            ->where('role', 'manager')
+            ->where('is_active', true)
+            ->firstOrFail();
+
         $team = DB::transaction(function () use (
             $validated,
             $currentUser,
+            $manager,
         ) {
             $team = Team::query()->create([
                 'name' => $validated['name'],
                 'created_by' => $currentUser->id,
             ]);
 
-            $team->members()->attach($currentUser->id, [
+            $team->members()->attach($manager->id, [
                 'member_role' => 'lead',
             ]);
 

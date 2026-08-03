@@ -39,16 +39,22 @@ class TaskController extends Controller
             )
             ->when(
                 $request->filled('team_id'),
-                fn ($query) => $query->where(
-                    'team_id',
-                    $request->integer('team_id'),
+                fn ($query) => $query->whereHas(
+                    'team',
+                    fn ($teamQuery) => $teamQuery->where(
+                        'uuid',
+                        $request->string('team_id')->toString(),
+                    ),
                 ),
             )
             ->when(
                 $request->filled('assigned_to'),
-                fn ($query) => $query->where(
-                    'assigned_to',
-                    $request->integer('assigned_to'),
+                fn ($query) => $query->whereHas(
+                    'assignee',
+                    fn ($userQuery) => $userQuery->where(
+                        'uuid',
+                        $request->string('assigned_to')->toString(),
+                    ),
                 ),
             )
             ->latest()

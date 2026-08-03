@@ -128,7 +128,7 @@ class InternalResourceTest extends TestCase
             ->withHeader('X-Service-Key', $this->serviceKey)
             ->getJson(
                 '/api/v1/internal/tasks'
-                ."?team_id={$team->id}"
+                ."?team_id={$team->uuid}"
                 .'&status=pending'
                 .'&priority=high'
             );
@@ -137,6 +137,46 @@ class InternalResourceTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $task->uuid);
+    }
+
+    public function test_internal_tasks_endpoint_filters_by_assignee_uuid(): void
+    {
+        $manager = User::factory()->manager()->create();
+        $assignedMember = User::factory()->teamMember()->create();
+        $otherMember = User::factory()->teamMember()->create();
+
+        $team = Team::factory()->create([
+            'created_by' => $manager->id,
+        ]);
+
+        $assignedTask = Task::factory()->create([
+            'team_id' => $team->id,
+            'created_by' => $manager->id,
+            'assigned_to' => $assignedMember->id,
+        ]);
+
+        Task::factory()->create([
+            'team_id' => $team->id,
+            'created_by' => $manager->id,
+            'assigned_to' => $otherMember->id,
+        ]);
+
+        $response = $this
+            ->withHeader('X-Service-Key', $this->serviceKey)
+            ->getJson(
+                '/api/v1/internal/tasks'
+                ."?assigned_to={$assignedMember->uuid}"
+                .'&per_page=100',
+            );
+
+        $response
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $assignedTask->uuid)
+            ->assertJsonPath(
+                'data.0.assigned_to',
+                $assignedMember->uuid,
+            );
     }
 
     public function test_internal_task_detail_returns_status_history(): void
@@ -188,7 +228,7 @@ class InternalResourceTest extends TestCase
         $response = $this
             ->withHeader('X-Service-Key', $this->serviceKey)
             ->getJson(
-                "/api/v1/internal/teams?user_id={$manager->id}&per_page=100",
+                "/api/v1/internal/teams?user_id={$manager->uuid}&per_page=100",
             );
 
         $response

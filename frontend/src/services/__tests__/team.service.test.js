@@ -1,72 +1,151 @@
-import AxiosMockAdapter from 'axios-mock-adapter';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import laravelClient from '../../api/laravelClient.js';
-import { getTeam, listTeams } from '../team.service.js';
+import {
+    addTeamMember,
+    createTeam,
+    getTeam,
+    listTeams,
+    removeTeamMember,
+} from '../team.service.js';
 
-const TEAM_UUID = '11111111-1111-4111-8111-111111111111';
-const MEMBER_UUID = '33333333-3333-4333-8333-333333333333';
+vi.mock('../../api/laravelClient.js', () => ({
+    default: {
+        get: vi.fn(),
+        post: vi.fn(),
+        delete: vi.fn(),
+    },
+}));
 
-describe('Team service', () => {
-    let mock;
-
+describe('team service', () => {
     beforeEach(() => {
-        mock = new AxiosMockAdapter(laravelClient);
+        vi.clearAllMocks();
     });
 
-    afterEach(() => {
-        mock.restore();
-    });
+    test('lists teams with query parameters', async () => {
+        const payload = {
+            data: [],
+            meta: {
+                current_page: 1,
+                last_page: 1,
+                total: 0,
+            },
+        };
 
-    test('lists teams with parameters', async () => {
-        mock.onGet('/teams').reply((config) => {
-            expect(config.params).toEqual({
-                per_page: 100,
-                search: 'engineering',
-            });
-
-            return [
-                200,
-                {
-                    data: [
-                        {
-                            id: TEAM_UUID,
-                            name: 'Engineering',
-                        },
-                    ],
-                },
-            ];
+        laravelClient.get.mockResolvedValue({
+            data: payload,
         });
 
-        const result = await listTeams({
-            per_page: 100,
+        const parameters = {
             search: 'engineering',
+            page: 1,
+        };
+
+        const response = await listTeams(parameters);
+
+        expect(laravelClient.get).toHaveBeenCalledWith('/teams', {
+            params: parameters,
         });
 
-        expect(result.data).toHaveLength(1);
-        expect(result.data[0].id).toBe(TEAM_UUID);
+        expect(response).toEqual(payload);
     });
 
-    test('retrieves one team with members', async () => {
-        mock.onGet(`/teams/${TEAM_UUID}`).reply(200, {
+    test('retrieves a team by UUID', async () => {
+        const payload = {
             data: {
                 team: {
-                    id: TEAM_UUID,
+                    id: 'team-uuid',
                     name: 'Engineering',
+                    members: [],
+                },
+            },
+        };
+
+        laravelClient.get.mockResolvedValue({
+            data: payload,
+        });
+
+        const response = await getTeam('team-uuid');
+
+        expect(laravelClient.get).toHaveBeenCalledWith('/teams/team-uuid');
+
+        expect(response).toEqual(payload);
+    });
+
+    test('creates a team', async () => {
+        const credentials = {
+            name: 'Platform Engineering',
+        };
+
+        const payload = {
+            data: {
+                team: {
+                    id: 'new-team-uuid',
+                    name: credentials.name,
+                },
+            },
+        };
+
+        laravelClient.post.mockResolvedValue({
+            data: payload,
+        });
+
+        const response = await createTeam(credentials);
+
+        expect(laravelClient.post).toHaveBeenCalledWith('/teams', credentials);
+
+        expect(response).toEqual(payload);
+    });
+
+    test('adds a member to a team', async () => {
+        const membership = {
+            user_id: 'user-uuid',
+            member_role: 'member',
+        };
+
+        const payload = {
+            data: {
+                team: {
+                    id: 'team-uuid',
                     members: [
                         {
-                            id: MEMBER_UUID,
-                            name: 'Team Member',
+                            id: 'user-uuid',
+                            member_role: 'member',
                         },
                     ],
                 },
             },
+        };
+
+        laravelClient.post.mockResolvedValue({
+            data: payload,
         });
 
-        const result = await getTeam(TEAM_UUID);
+        const response = await addTeamMember('team-uuid', membership);
 
-        expect(result.data.team.id).toBe(TEAM_UUID);
-        expect(result.data.team.members).toHaveLength(1);
-        expect(result.data.team.members[0].id).toBe(MEMBER_UUID);
+        expect(laravelClient.post).toHaveBeenCalledWith(
+            '/teams/team-uuid/members',
+            membership,
+        );
+
+        expect(response).toEqual(payload);
+    });
+
+    test('removes a member from a team', async () => {
+        const payload = {
+            message: 'Team member removed successfully.',
+        };
+
+        laravelClient.delete.mockResolvedValue({
+            data: payload,
+        });
+
+        const response = await removeTeamMember('team-uuid', 'user-uuid');
+
+        expect(laravelClient.delete).toHaveBeenCalledWith(
+            '/teams/team-uuid/members/user-uuid',
+        );
+
+        expect(response).toEqual(payload);
     });
 });

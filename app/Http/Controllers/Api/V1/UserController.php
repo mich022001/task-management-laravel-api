@@ -24,43 +24,59 @@ class UserController extends Controller
 
         $query = User::query();
 
-        // Managers may only list Team Members belonging to teams
-        // they own or lead.
+        // Managers may retrieve active Manager accounts for team-lead
+        // assignment. Other user-management queries remain restricted to
+        // Team Members belonging to teams they lead.
         if ($currentUser->role === 'manager') {
-            $query
-                ->where('role', 'team_member')
-                ->whereHas('teams', function ($teamQuery) use ($currentUser) {
-                    $teamQuery->where(function ($managedTeamQuery) use (
-                        $currentUser,
-                    ) {
-                        $managedTeamQuery
-                            ->where(
-                                'teams.created_by',
-                                $currentUser->id,
-                            )
-                            ->orWhereExists(function ($membershipQuery) use (
-                                $currentUser,
-                            ) {
-                                $membershipQuery
-                                    ->selectRaw('1')
-                                    ->from(
-                                        'team_members as manager_memberships',
-                                    )
-                                    ->whereColumn(
-                                        'manager_memberships.team_id',
-                                        'teams.id',
-                                    )
-                                    ->where(
-                                        'manager_memberships.user_id',
-                                        $currentUser->id,
-                                    )
-                                    ->where(
-                                        'manager_memberships.member_role',
-                                        'lead',
-                                    );
-                            });
-                    });
-                });
+            $requestedRole = $request->string('role')->toString();
+
+            if ($requestedRole === 'manager') {
+                $query
+                    ->where('role', 'manager')
+                    ->where('is_active', true);
+            } else {
+                $query
+                    ->where('role', 'team_member')
+                    ->whereHas(
+                        'teams',
+                        function ($teamQuery) use ($currentUser) {
+                            $teamQuery->where(
+                                function ($managedTeamQuery) use (
+                                    $currentUser,
+                                ) {
+                                    $managedTeamQuery
+                                        ->where(
+                                            'teams.created_by',
+                                            $currentUser->id,
+                                        )
+                                        ->orWhereExists(
+                                            function (
+                                                $membershipQuery,
+                                            ) use ($currentUser) {
+                                                $membershipQuery
+                                                    ->selectRaw('1')
+                                                    ->from(
+                                                        'team_members as manager_memberships',
+                                                    )
+                                                    ->whereColumn(
+                                                        'manager_memberships.team_id',
+                                                        'teams.id',
+                                                    )
+                                                    ->where(
+                                                        'manager_memberships.user_id',
+                                                        $currentUser->id,
+                                                    )
+                                                    ->where(
+                                                        'manager_memberships.member_role',
+                                                        'lead',
+                                                    );
+                                            },
+                                        );
+                                },
+                            );
+                        },
+                    );
+            }
         }
 
         $query

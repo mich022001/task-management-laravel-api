@@ -37,34 +37,51 @@ class TeamManagementTest extends TestCase
             ->assertJsonPath('meta.per_page', 10);
     }
 
-    public function test_manager_can_create_team_and_becomes_lead(): void
+    public function test_manager_can_create_team_with_assigned_handler(): void
     {
-        $manager = User::factory()->manager()->create();
+        $creator = User::factory()->create([
+            'role' => 'manager',
+            'is_active' => true,
+        ]);
+
+        $handler = User::factory()->create([
+            'role' => 'manager',
+            'is_active' => true,
+        ]);
 
         $response = $this
-            ->actingAs($manager, 'api')
+            ->actingAs($creator, 'api')
             ->postJson('/api/v1/teams', [
                 'name' => 'Platform Team',
+                'manager_id' => $handler->uuid,
             ]);
 
         $response
             ->assertCreated()
             ->assertJsonPath('message', 'Team created successfully.')
             ->assertJsonPath('data.team.name', 'Platform Team')
-            ->assertJsonPath('data.team.members.0.id', $manager->uuid)
+            ->assertJsonPath('data.team.creator.id', $creator->uuid)
+            ->assertJsonPath('data.team.members.0.id', $handler->uuid)
             ->assertJsonPath(
                 'data.team.members.0.member_role',
-                'lead'
+                'lead',
             );
 
         $team = Team::query()
             ->where('name', 'Platform Team')
             ->firstOrFail();
 
+        $this->assertSame($creator->id, $team->created_by);
+
         $this->assertDatabaseHas('team_members', [
             'team_id' => $team->id,
-            'user_id' => $manager->id,
+            'user_id' => $handler->id,
             'member_role' => 'lead',
+        ]);
+
+        $this->assertDatabaseMissing('team_members', [
+            'team_id' => $team->id,
+            'user_id' => $creator->id,
         ]);
     }
 

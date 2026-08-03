@@ -66,25 +66,35 @@ class TeamMemberManagementTest extends TestCase
 
     public function test_manager_lead_can_add_team_member(): void
     {
-        $owner = User::factory()->manager()->create();
-        $lead = User::factory()->manager()->create();
-        $member = User::factory()->teamMember()->create();
-
-        $team = Team::factory()->create([
-            'created_by' => $owner->id,
+        $manager = User::factory()->create([
+            'role' => 'manager',
+            'is_active' => true,
         ]);
 
-        $team->members()->attach($lead->id, [
+        $member = User::factory()->create([
+            'role' => 'team_member',
+            'is_active' => true,
+        ]);
+
+        $team = Team::factory()->create([
+            'created_by' => $manager->id,
+        ]);
+
+        $team->members()->attach($manager->id, [
             'member_role' => 'lead',
         ]);
 
-        $response = $this
-            ->actingAs($lead, 'api')
+        $this
+            ->actingAs($manager, 'api')
             ->postJson("/api/v1/teams/{$team->uuid}/members", [
                 'user_id' => $member->uuid,
-            ]);
-
-        $response->assertOk();
+                'member_role' => 'member',
+            ])
+            ->assertOk()
+            ->assertJsonPath(
+                'message',
+                'Team member added successfully.',
+            );
 
         $this->assertDatabaseHas('team_members', [
             'team_id' => $team->id,

@@ -4,7 +4,6 @@ import ErrorState from '../components/common/ErrorState.jsx';
 import Loading from '../components/common/Loading.jsx';
 import DashboardCards from '../components/dashboard/DashboardCards.jsx';
 import PageHeader from '../components/ui/PageHeader.jsx';
-import { useAuth } from '../hooks/useAuth.js';
 import { getTaskSummary } from '../services/analytics.service.js';
 
 function getApiErrorMessage(error) {
@@ -15,11 +14,8 @@ function getApiErrorMessage(error) {
 }
 
 export default function Dashboard() {
-    const { user } = useAuth();
-    const canViewAnalytics = user?.role === 'admin' || user?.role === 'manager';
-
     const [summary, setSummary] = useState(null);
-    const [isLoading, setIsLoading] = useState(canViewAnalytics);
+    const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
     const retryLoadSummary = useCallback(async () => {
@@ -39,10 +35,6 @@ export default function Dashboard() {
     }, []);
 
     useEffect(() => {
-        if (!canViewAnalytics) {
-            return undefined;
-        }
-
         let isCancelled = false;
 
         getTaskSummary()
@@ -71,7 +63,7 @@ export default function Dashboard() {
         return () => {
             isCancelled = true;
         };
-    }, [canViewAnalytics]);
+    }, []);
 
     return (
         <section>
@@ -80,16 +72,6 @@ export default function Dashboard() {
                 title="Dashboard"
                 description="Review task activity, workload progress, and deadlines within your authorized workspace."
             />
-
-            {!canViewAnalytics ? (
-                <div className="state-panel">
-                    <h3>Your assigned tasks</h3>
-                    <p className="muted-text">
-                        Open the Tasks page to review and update tasks assigned
-                        to you.
-                    </p>
-                </div>
-            ) : null}
 
             {isLoading ? (
                 <Loading
