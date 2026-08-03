@@ -38,6 +38,7 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password123'),
             'role' => 'team_member',
             'is_active' => true,
+            'email_notifications_enabled' => true,
             'remember_token' => Str::random(10),
         ];
     }
@@ -79,6 +80,16 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_active' => false,
+        ]);
+    }
+
+    /**
+     * Disable email notifications for the user.
+     */
+    public function emailNotificationsDisabled(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email_notifications_enabled' => false,
         ]);
     }
 

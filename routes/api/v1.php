@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\NotificationPreferenceController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\TaskActivityController;
 use App\Http\Controllers\Api\V1\TaskCommentController;
@@ -116,6 +117,18 @@ Route::middleware([
         '/notifications/{notification}',
         [NotificationController::class, 'destroy'],
     );
+
+    Route::prefix('settings')->group(function () {
+        Route::get(
+            '/notifications',
+            [NotificationPreferenceController::class, 'show'],
+        );
+
+        Route::patch(
+            '/notifications',
+            [NotificationPreferenceController::class, 'update'],
+        );
+    });
 
     Route::middleware('role:admin,manager')->group(function () {
         Route::get('/users', [UserController::class, 'index']);

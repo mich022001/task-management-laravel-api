@@ -34,6 +34,7 @@ class StoreInternalNotificationRequest extends FormRequest
                 'string',
                 Rule::in([
                     'task_assigned',
+                    'task_status_changed',
                     'task_cancelled',
                     'task_completed',
                     'deadline_upcoming',

@@ -9,6 +9,10 @@ use Illuminate\Validation\ValidationException;
 
 class TaskTransitionService
 {
+    public function __construct(
+        private readonly TaskNotificationService $taskNotificationService,
+    ) {}
+
     /**
      * @var array<string, array<int, string>>
      */
@@ -72,7 +76,7 @@ class TaskTransitionService
                     : null,
             ]);
 
-            $lockedTask->statusHistories()->create([
+            $history = $lockedTask->statusHistories()->create([
                 'previous_status' => $previousStatus,
                 'new_status' => $newStatus,
                 'note' => $note,
@@ -97,11 +101,19 @@ class TaskTransitionService
                 ],
             ]);
 
-            return $lockedTask->fresh([
+            $lockedTask->load([
                 'team.creator',
                 'assignee',
                 'creator',
             ]);
+
+            $this->taskNotificationService->statusChanged(
+                task: $lockedTask,
+                history: $history,
+                actor: $changedBy,
+            );
+
+            return $lockedTask;
         });
     }
 

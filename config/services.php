@@ -28,6 +28,15 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    'node_notifications' => [
+        'url' => env(
+            'NODE_NOTIFICATION_URL',
+            'http://localhost:3000/api/v1/notifications',
+        ),
+        'service_key' => env('NODE_SERVICE_KEY'),
+        'timeout' => (int) env('NODE_NOTIFICATION_TIMEOUT', 5),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

@@ -9,6 +9,8 @@ use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
+use App\Services\NodeNotificationService;
+use App\Services\TaskNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +18,11 @@ use Illuminate\Support\Facades\Gate;
 
 class TaskController extends Controller
 {
+    public function __construct(
+        private readonly TaskNotificationService $taskNotificationService,
+        private readonly NodeNotificationService $nodeNotificationService,
+    ) {}
+
     public function index(Request $request): JsonResponse
     {
         Gate::authorize('viewAny', Task::class);
@@ -189,6 +196,19 @@ class TaskController extends Controller
             'creator',
         ]);
 
+        if ($task->assignee) {
+            $this->taskNotificationService->assignment(
+                task: $task,
+                recipient: $task->assignee,
+                eventKey: 'created',
+            );
+
+            $this->nodeNotificationService->taskAssigned(
+                task: $task,
+                recipient: $task->assignee,
+            );
+        }
+
         return response()->json([
             'message' => 'Task created successfully.',
             'data' => [
@@ -238,6 +258,7 @@ class TaskController extends Controller
     ): JsonResponse {
         $validated = $request->validated();
         $currentUser = auth('api')->user();
+        $previousAssigneeId = $task->assigned_to;
 
         if (array_key_exists('team_id', $validated)) {
             $validated['team_id'] = Team::query()
@@ -294,6 +315,25 @@ class TaskController extends Controller
             'assignee',
             'creator',
         ]);
+
+        if (
+            $task->assignee
+            && $task->assigned_to !== $previousAssigneeId
+        ) {
+            $this->taskNotificationService->assignment(
+                task: $task,
+                recipient: $task->assignee,
+                eventKey: sprintf(
+                    'reassigned:%s',
+                    $task->updated_at->getTimestamp(),
+                ),
+            );
+
+            $this->nodeNotificationService->taskAssigned(
+                task: $task,
+                recipient: $task->assignee,
+            );
+        }
 
         return response()->json([
             'message' => 'Task updated successfully.',

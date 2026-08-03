@@ -26,6 +26,8 @@ class UserResource extends JsonResource
 
             'is_active' => $this->is_active,
 
+            'email_notifications_enabled' => $this->email_notifications_enabled,
+
             'created_at' => $this->created_at,
 
             'updated_at' => $this->updated_at,
