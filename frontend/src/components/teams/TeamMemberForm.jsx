@@ -46,9 +46,7 @@ export default function TeamMemberForm({
     const userErrors = validationErrors.user_id ?? [];
     const roleErrors = validationErrors.member_role ?? [];
 
-    const selectedUser = eligibleUsers.find(
-        (user) => user.id === form.user_id,
-    );
+    const selectedUser = eligibleUsers.find((user) => user.id === form.user_id);
 
     const canBeLead = selectedUser?.role === 'manager';
 
@@ -101,9 +99,7 @@ export default function TeamMemberForm({
                     >
                         <option value="member">Member</option>
 
-                        {canBeLead ? (
-                            <option value="lead">Lead</option>
-                        ) : null}
+                        {canBeLead ? <option value="lead">Lead</option> : null}
                     </select>
 
                     {roleErrors.length > 0 ? (

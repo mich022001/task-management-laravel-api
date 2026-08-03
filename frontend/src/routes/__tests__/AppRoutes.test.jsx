@@ -17,6 +17,7 @@ function renderAppRoutes({
         isInitializing,
         login: vi.fn(),
         logout: vi.fn(),
+        updateCurrentUser: vi.fn(),
     };
 
     render(
@@ -227,6 +228,25 @@ describe('Application routes', () => {
         expect(
             screen.getByRole('heading', {
                 name: '403',
+            }),
+        ).toBeInTheDocument();
+    });
+
+    test('allows a team member to access Settings', () => {
+        renderAppRoutes({
+            initialEntries: ['/settings'],
+            user: {
+                id: '33333333-3333-4333-8333-333333333333',
+                name: 'Team Member',
+                role: 'team_member',
+                email_notifications_enabled: true,
+            },
+            isAuthenticated: true,
+        });
+
+        expect(
+            screen.getByRole('heading', {
+                name: 'Settings',
             }),
         ).toBeInTheDocument();
     });

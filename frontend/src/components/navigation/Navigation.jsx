@@ -34,6 +34,12 @@ const navigationItems = [
         icon: 'analytics',
         roles: ['admin', 'manager'],
     },
+    {
+        label: 'Settings',
+        to: '/settings',
+        icon: 'bell',
+        roles: ['admin', 'manager', 'team_member'],
+    },
 ];
 
 export default function Navigation({ onNavigate }) {

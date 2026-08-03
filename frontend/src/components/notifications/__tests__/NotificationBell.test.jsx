@@ -153,4 +153,62 @@ describe('NotificationBell', () => {
 
         expect(screen.getByText('You are all caught up')).toBeInTheDocument();
     });
+
+    test('renders structured notification content and unread styling', async () => {
+        const user = userEvent.setup();
+
+        renderBell();
+
+        await user.click(
+            await screen.findByRole('button', {
+                name: 'Notifications, 1 unread',
+            }),
+        );
+
+        const notificationButton = screen.getByRole('button', {
+            name: /New task assigned/,
+        });
+
+        expect(notificationButton).toHaveClass('notification-item');
+        expect(notificationButton).toHaveClass('notification-item-unread');
+
+        expect(
+            notificationButton.querySelector('.notification-item-icon'),
+        ).not.toBeNull();
+
+        expect(
+            notificationButton.querySelector('.notification-item-copy'),
+        ).not.toBeNull();
+
+        expect(notificationButton.querySelector('small')).not.toBeNull();
+    });
+
+    test('does not apply unread styling to a read notification', async () => {
+        const user = userEvent.setup();
+
+        listNotificationsMock.mockResolvedValue({
+            data: [
+                createNotification({
+                    is_read: true,
+                }),
+            ],
+            meta: {
+                unread_count: 0,
+            },
+        });
+
+        renderBell();
+
+        await user.click(
+            await screen.findByRole('button', {
+                name: 'Notifications',
+            }),
+        );
+
+        expect(
+            screen.getByRole('button', {
+                name: /New task assigned/,
+            }),
+        ).not.toHaveClass('notification-item-unread');
+    });
 });

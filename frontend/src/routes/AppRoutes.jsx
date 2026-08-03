@@ -15,6 +15,7 @@ import Login from '../pages/Login.jsx';
 import NotFound from '../pages/NotFound.jsx';
 import Register from '../pages/Register.jsx';
 import ResetPassword from '../pages/ResetPassword.jsx';
+import Settings from '../pages/Settings.jsx';
 import TaskDetails from '../pages/TaskDetails.jsx';
 import Tasks from '../pages/Tasks.jsx';
 import TeamDetails from '../pages/TeamDetails.jsx';
@@ -41,6 +42,8 @@ export default function AppRoutes() {
                     <Route path="/dashboard" element={<Dashboard />} />
 
                     <Route path="/tasks" element={<Tasks />} />
+
+                    <Route path="/settings" element={<Settings />} />
 
                     <Route path="/tasks/:taskId" element={<TaskDetails />} />
 

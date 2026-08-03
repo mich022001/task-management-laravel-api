@@ -18,6 +18,21 @@ function getErrorMessage(error) {
     );
 }
 
+function getNotificationIcon(type) {
+    switch (type) {
+        case 'deadline_upcoming':
+        case 'deadline_overdue':
+        case 'deadline_reminder':
+            return 'clock';
+
+        case 'task_cancelled':
+            return 'alert';
+
+        default:
+            return 'tasks';
+    }
+}
+
 function formatNotificationDate(value) {
     if (!value) {
         return '';
@@ -251,7 +266,11 @@ export default function NotificationBell() {
                                 <li key={notification.id}>
                                     <button
                                         type="button"
-                                        className="notification-item"
+                                        className={
+                                            notification.is_read
+                                                ? 'notification-item'
+                                                : 'notification-item notification-item-unread'
+                                        }
                                         disabled={
                                             activeNotificationId ===
                                             notification.id
@@ -264,15 +283,9 @@ export default function NotificationBell() {
                                     >
                                         <span className="notification-item-icon">
                                             <Icon
-                                                name={
-                                                    notification.type ===
-                                                    'deadline_reminder'
-                                                        ? 'clock'
-                                                        : notification.type ===
-                                                            'task_cancelled'
-                                                          ? 'alert'
-                                                          : 'tasks'
-                                                }
+                                                name={getNotificationIcon(
+                                                    notification.type,
+                                                )}
                                                 size={18}
                                             />
                                         </span>

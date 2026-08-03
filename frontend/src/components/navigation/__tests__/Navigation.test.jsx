@@ -43,6 +43,10 @@ describe('Role-aware navigation', () => {
         expect(
             screen.getByRole('link', { name: 'Analytics' }),
         ).toBeInTheDocument();
+
+        expect(
+            screen.getByRole('link', { name: 'Settings' }),
+        ).toBeInTheDocument();
     });
 
     test('manager sees the Users link', () => {
@@ -64,6 +68,10 @@ describe('Role-aware navigation', () => {
         expect(
             screen.getByRole('link', { name: 'Analytics' }),
         ).toBeInTheDocument();
+
+        expect(
+            screen.getByRole('link', { name: 'Settings' }),
+        ).toBeInTheDocument();
     });
 
     test('team member sees only Dashboard and Tasks', () => {
@@ -77,6 +85,10 @@ describe('Role-aware navigation', () => {
         ).toBeInTheDocument();
 
         expect(screen.getByRole('link', { name: 'Tasks' })).toBeInTheDocument();
+
+        expect(
+            screen.getByRole('link', { name: 'Settings' }),
+        ).toBeInTheDocument();
 
         expect(
             screen.queryByRole('link', { name: 'Teams' }),

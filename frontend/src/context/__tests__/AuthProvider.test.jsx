@@ -301,4 +301,39 @@ describe('AuthProvider', () => {
         expect(result.current.user).toBeNull();
         expect(result.current.isAuthenticated).toBe(false);
     });
+
+    test('updates the authenticated user in the current session', async () => {
+        loginUserMock.mockResolvedValue({
+            data: {
+                user: {
+                    id: '44444444-4444-4444-8444-444444444444',
+                    name: 'System Admin',
+                    role: 'admin',
+                    email_notifications_enabled: true,
+                },
+                access_token: 'admin-jwt-token',
+            },
+        });
+
+        const { result } = renderHook(() => useAuth(), {
+            wrapper,
+        });
+
+        await act(async () => {
+            await result.current.login({
+                email: 'admin@test.com',
+                password: 'password123',
+            });
+        });
+
+        act(() => {
+            result.current.updateCurrentUser({
+                email_notifications_enabled: false,
+            });
+        });
+
+        expect(result.current.user.email_notifications_enabled).toBe(false);
+
+        expect(result.current.user.name).toBe('System Admin');
+    });
 });

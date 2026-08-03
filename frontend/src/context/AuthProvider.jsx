@@ -119,6 +119,19 @@ export function AuthProvider({ children }) {
         return authenticatedUser;
     }, []);
 
+    const updateCurrentUser = useCallback((changes) => {
+        setUser((currentUser) => {
+            if (!currentUser) {
+                return currentUser;
+            }
+
+            return {
+                ...currentUser,
+                ...changes,
+            };
+        });
+    }, []);
+
     const logout = useCallback(async () => {
         try {
             if (getAccessToken()) {
@@ -141,8 +154,9 @@ export function AuthProvider({ children }) {
             isInitializing,
             login,
             logout,
+            updateCurrentUser,
         }),
-        [user, isInitializing, login, logout],
+        [user, isInitializing, login, logout, updateCurrentUser],
     );
 
     return (
