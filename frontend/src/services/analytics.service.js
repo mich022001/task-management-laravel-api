@@ -8,6 +8,14 @@ export async function getTaskSummary(parameters = {}) {
     return response.data;
 }
 
+export async function getTeamProductivity(teamId) {
+    const response = await nodeClient.get(
+        `/analytics/teams/${teamId}/productivity`,
+    );
+
+    return response.data;
+}
+
 export async function getUpcomingDeadlines(parameters = {}) {
     const response = await nodeClient.get('/analytics/deadlines/upcoming', {
         params: parameters,
