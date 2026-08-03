@@ -74,6 +74,7 @@ export default function Login() {
             <section className="login-card">
                 <div>
                     <p className="eyebrow">Task Management Platform</p>
+
                     <h1>Sign in</h1>
                 </div>
 
@@ -121,10 +122,8 @@ export default function Login() {
                         </div>
                     </label>
 
-                    <div className="auth-links">
+                    <div className="forgot-password-link">
                         <Link to="/forgot-password">Forgot your password?</Link>
-
-                        <Link to="/register">Create an account</Link>
                     </div>
 
                     {successMessage ? (
@@ -146,6 +145,11 @@ export default function Login() {
                     >
                         {isSubmitting ? 'Signing in...' : 'Sign in'}
                     </button>
+
+                    <p className="auth-register-prompt">
+                        Don't have an account?{' '}
+                        <Link to="/register">Create an account</Link>
+                    </p>
                 </form>
             </section>
         </main>

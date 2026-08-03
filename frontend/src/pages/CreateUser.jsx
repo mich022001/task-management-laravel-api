@@ -4,22 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import ErrorState from '../components/common/ErrorState.jsx';
 import PageHeader from '../components/ui/PageHeader.jsx';
 import UserForm from '../components/users/UserForm.jsx';
+import { useAuth } from '../hooks/useAuth.js';
 import { createUser } from '../services/user.service.js';
-
-const allowedRoles = [
-    {
-        value: 'admin',
-        label: 'Admin',
-    },
-    {
-        value: 'manager',
-        label: 'Manager',
-    },
-    {
-        value: 'team_member',
-        label: 'Team Member',
-    },
-];
+import { getAssignableUserRoleOptions } from '../utils/userRoleOptions.js';
 
 function normalizeValidationErrors(error) {
     const validationErrors = error.response?.data?.errors;
@@ -46,6 +33,9 @@ function getErrorMessage(error) {
 
 export default function CreateUser() {
     const navigate = useNavigate();
+    const { user: currentUser } = useAuth();
+
+    const allowedRoles = getAssignableUserRoleOptions(currentUser?.role);
 
     const [validationErrors, setValidationErrors] = useState({});
     const [pageError, setPageError] = useState('');

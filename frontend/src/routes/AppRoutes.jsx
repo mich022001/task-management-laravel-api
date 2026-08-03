@@ -72,7 +72,11 @@ export default function AppRoutes() {
                         <Route path="/analytics" element={<Analytics />} />
                     </Route>
 
-                    <Route element={<RoleRoute allowedRoles={['admin']} />}>
+                    <Route
+                        element={
+                            <RoleRoute allowedRoles={['admin', 'manager']} />
+                        }
+                    >
                         <Route path="/users" element={<Users />} />
                         <Route path="/users/create" element={<CreateUser />} />
 

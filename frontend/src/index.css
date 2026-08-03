@@ -4909,3 +4909,244 @@ body {
         padding: 17px;
     }
 }
+
+/* ==========================================================================
+   Authentication pages
+   ========================================================================== */
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgb(49 87 213 / 8%),
+            transparent 36rem
+        ),
+        #f4f6fa;
+}
+
+.login-card {
+    width: min(100%, 400px);
+    display: grid;
+    gap: 24px;
+    padding: 36px;
+    background: #ffffff;
+    border: 1px solid #dfe5f0;
+    border-radius: 20px;
+    box-shadow:
+        0 24px 60px rgb(20 31 54 / 9%),
+        0 4px 12px rgb(20 31 54 / 4%);
+}
+
+.login-card > div:first-child {
+    display: grid;
+    gap: 8px;
+}
+
+.login-card > div:first-child h1 {
+    margin: 0;
+    color: #172033;
+    font-size: 1.85rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+}
+
+.login-form {
+    display: grid;
+    gap: 18px;
+}
+
+.login-form label {
+    display: grid;
+    gap: 9px;
+    color: #172033;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.login-form input {
+    width: 100%;
+    min-height: 50px;
+    padding: 12px 14px;
+    color: #172033;
+    background: #ffffff;
+    border: 1px solid #c8d2e3;
+    border-radius: 11px;
+    outline: none;
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.login-form input:hover {
+    border-color: #9eabc0;
+}
+
+.login-form input:focus {
+    border-color: #3157d5;
+    box-shadow: 0 0 0 3px rgb(49 87 213 / 12%);
+}
+
+.login-form .password-input-group {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+}
+
+.login-form .password-input-group input {
+    flex: 1;
+    min-width: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.login-form .password-input-group .password-toggle {
+    min-width: 74px;
+    margin-left: -1px;
+    padding-inline: 16px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.forgot-password-link {
+    margin: 4px 0 6px;
+    text-align: center;
+}
+
+.forgot-password-link a,
+.auth-register-prompt a {
+    color: #3157d5;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.forgot-password-link a {
+    font-size: 0.875rem;
+}
+
+.forgot-password-link a:hover,
+.auth-register-prompt a:hover {
+    text-decoration: underline;
+}
+
+.login-form > .primary-button {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 2px;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 18px rgb(49 87 213 / 18%);
+    transition:
+        background 160ms ease,
+        box-shadow 160ms ease,
+        transform 160ms ease;
+}
+
+.login-form > .primary-button:hover:not(:disabled) {
+    background: #2749bd;
+    box-shadow: 0 10px 24px rgb(49 87 213 / 24%);
+    transform: translateY(-1px);
+}
+
+.auth-register-prompt {
+    margin: -2px 0 0;
+    color: #667085;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.success-message {
+    margin: 0;
+    padding: 13px 14px;
+    color: #176c3a;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    background: #ecfdf3;
+    border: 1px solid #b7ebc6;
+    border-radius: 10px;
+}
+
+.register-card {
+    width: min(100%, 470px);
+}
+
+.register-card .page-heading {
+    display: block;
+    margin: 0;
+}
+
+.register-card .page-heading h2 {
+    margin: 8px 0 10px;
+    font-size: 1.85rem;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+}
+
+.register-card .page-heading p:last-child {
+    margin: 0;
+    color: #667085;
+    line-height: 1.6;
+}
+
+.register-card .login-form {
+    gap: 17px;
+}
+
+.register-card .field-errors {
+    margin-top: -10px;
+}
+
+.register-card .field-errors .error-message {
+    padding: 9px 12px;
+    font-size: 0.8rem;
+}
+
+.register-card .form-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.register-card .form-actions .primary-button,
+.register-card .form-actions .secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.register-card .form-help-text {
+    margin: 0;
+    padding: 18px 2px 0;
+    color: #667085;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    border-top: 1px solid #edf0f5;
+}
+
+@media (max-width: 520px) {
+    .login-page {
+        padding: 40px 14px;
+    }
+
+    .login-card {
+        padding: 28px 22px;
+        border-radius: 17px;
+    }
+
+    .login-card > div:first-child h1,
+    .register-card .page-heading h2 {
+        font-size: 1.65rem;
+    }
+
+    .register-card .form-actions {
+        grid-template-columns: 1fr;
+    }
+}

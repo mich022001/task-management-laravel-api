@@ -159,7 +159,7 @@ describe('Application routes', () => {
         ).toBeInTheDocument();
     });
 
-    test('redirects a manager away from the Users page', () => {
+    test('allows a manager to access the Users page', () => {
         renderAppRoutes({
             initialEntries: ['/users'],
             user: {
@@ -172,12 +172,26 @@ describe('Application routes', () => {
 
         expect(
             screen.getByRole('heading', {
-                name: '403',
+                name: 'Users',
             }),
         ).toBeInTheDocument();
+    });
+
+    test('redirects a team member away from the Users page', () => {
+        renderAppRoutes({
+            initialEntries: ['/users'],
+            user: {
+                id: '33333333-3333-4333-8333-333333333333',
+                name: 'Team Member',
+                role: 'team_member',
+            },
+            isAuthenticated: true,
+        });
 
         expect(
-            screen.getByText('You do not have permission to view this page.'),
+            screen.getByRole('heading', {
+                name: '403',
+            }),
         ).toBeInTheDocument();
     });
 

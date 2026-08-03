@@ -5,22 +5,9 @@ import ErrorState from '../components/common/ErrorState.jsx';
 import Loading from '../components/common/Loading.jsx';
 import PageHeader from '../components/ui/PageHeader.jsx';
 import UserForm from '../components/users/UserForm.jsx';
+import { useAuth } from '../hooks/useAuth.js';
 import { getUser, updateUser } from '../services/user.service.js';
-
-const allowedRoles = [
-    {
-        value: 'admin',
-        label: 'Admin',
-    },
-    {
-        value: 'manager',
-        label: 'Manager',
-    },
-    {
-        value: 'team_member',
-        label: 'Team Member',
-    },
-];
+import { getAssignableUserRoleOptions } from '../utils/userRoleOptions.js';
 
 function normalizeValidationErrors(error) {
     const validationErrors = error.response?.data?.errors;
@@ -48,6 +35,9 @@ function getErrorMessage(error) {
 export default function EditUser() {
     const { userId } = useParams();
     const navigate = useNavigate();
+    const { user: currentUser } = useAuth();
+
+    const allowedRoles = getAssignableUserRoleOptions(currentUser?.role);
 
     const [user, setUser] = useState(null);
     const [validationErrors, setValidationErrors] = useState({});
