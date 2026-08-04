@@ -9,7 +9,8 @@ import StatCard from '../components/ui/StatCard.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import {
     getTaskSummary,
-    getTeamProductivity,
+    getTeamHighlights,
+    getTeamReport,
     getUpcomingDeadlines,
 } from '../services/analytics.service.js';
 import { listTeams } from '../services/team.service.js';
@@ -251,13 +252,178 @@ function MemberProductivityTable({ members }) {
     );
 }
 
+function TeamHighlightsTable({ teams, selectedTeamId, onSelectTeam }) {
+    if (teams.length === 0) {
+        return (
+            <EmptyState
+                title="No team analytics"
+                description="No teams are currently available for analytics."
+            />
+        );
+    }
+
+    return (
+        <div className="table-container analytics-table-container">
+            <table className="task-table analytics-team-summary-table">
+                <colgroup>
+                    <col className="analytics-col-team" />
+                    <col className="analytics-col-members" />
+                    <col className="analytics-col-total" />
+
+                    <col className="analytics-col-status" />
+                    <col className="analytics-col-status" />
+                    <col className="analytics-col-status" />
+                    <col className="analytics-col-status" />
+                    <col className="analytics-col-status" />
+
+                    <col className="analytics-col-priority" />
+                    <col className="analytics-col-priority" />
+                    <col className="analytics-col-priority" />
+
+                    <col className="analytics-col-risk" />
+                    <col className="analytics-col-risk" />
+                    <col className="analytics-col-risk" />
+
+                    <col className="analytics-col-completion" />
+                    <col className="analytics-col-average" />
+                </colgroup>
+
+                <thead>
+                    <tr>
+                        <th rowSpan="2">Team</th>
+                        <th rowSpan="2">Members</th>
+                        <th rowSpan="2">Total</th>
+                        <th colSpan="5">Task status</th>
+                        <th colSpan="3">Priority</th>
+                        <th colSpan="3">High-priority risk</th>
+                        <th rowSpan="2">Completion</th>
+                        <th rowSpan="2">Avg. completion</th>
+                    </tr>
+
+                    <tr>
+                        <th>
+                            Yet to
+                            <br />
+                            start
+                        </th>
+                        <th>
+                            In
+                            <br />
+                            progress
+                        </th>
+                        <th>Completed</th>
+                        <th>Overdue</th>
+                        <th>Cancelled</th>
+
+                        <th>Low</th>
+                        <th>Medium</th>
+                        <th>High</th>
+
+                        <th>
+                            Yet to
+                            <br />
+                            start
+                        </th>
+                        <th>
+                            In
+                            <br />
+                            progress
+                        </th>
+                        <th>Overdue</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {teams.map((team) => (
+                        <tr
+                            key={team.team_id}
+                            className={
+                                team.team_id === selectedTeamId
+                                    ? 'analytics-selected-row'
+                                    : ''
+                            }
+                            onClick={() => onSelectTeam(team.team_id)}
+                        >
+                            <td>
+                                <strong>{team.team_name}</strong>
+                            </td>
+
+                            <td>{formatNumber(team.member_count)}</td>
+                            <td>{formatNumber(team.total_tasks)}</td>
+
+                            <td>{formatNumber(team.status?.yet_to_start)}</td>
+
+                            <td>{formatNumber(team.status?.in_progress)}</td>
+
+                            <td>{formatNumber(team.status?.completed)}</td>
+
+                            <td>{formatNumber(team.overdue_tasks)}</td>
+
+                            <td>{formatNumber(team.status?.cancelled)}</td>
+
+                            <td>{formatNumber(team.priority?.low)}</td>
+                            <td>{formatNumber(team.priority?.medium)}</td>
+                            <td>{formatNumber(team.priority?.high)}</td>
+
+                            <td>
+                                {formatNumber(team.high_priority?.yet_to_start)}
+                            </td>
+
+                            <td>
+                                {formatNumber(team.high_priority?.in_progress)}
+                            </td>
+
+                            <td>{formatNumber(team.high_priority?.overdue)}</td>
+
+                            <td>{formatPercentage(team.completion_rate)}</td>
+
+                            <td>{formatDays(team.average_completion_days)}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+function normalizeReportMembers(members = []) {
+    return members.map((member) => {
+        const summary = member.summary ?? {};
+
+        return {
+            user_id: member.user_id,
+            name: member.name,
+            email: member.email,
+            member_role: member.member_role,
+            assigned_tasks: summary.assigned_tasks ?? 0,
+            completed_tasks: summary.completed_tasks ?? 0,
+            completion_rate: summary.completion_rate ?? 0,
+            priority: summary.priority ?? {
+                low: 0,
+                medium: 0,
+                high: 0,
+            },
+            average_completion_days: summary.average_completion_days ?? 0,
+            average_completion_days_by_priority:
+                summary.average_completion_days_by_priority ?? {
+                    low: 0,
+                    medium: 0,
+                    high: 0,
+                },
+        };
+    });
+}
+
 export default function Analytics() {
     const { user } = useAuth();
 
     const [teams, setTeams] = useState([]);
+    const [teamHighlights, setTeamHighlights] = useState([]);
     const [selectedTeamId, setSelectedTeamId] = useState('');
+    const [selectedMemberId, setSelectedMemberId] = useState('');
+    const [teamMembers, setTeamMembers] = useState([]);
+    const [teamReport, setTeamReport] = useState(null);
     const [taskSummary, setTaskSummary] = useState(null);
-    const [teamProductivity, setTeamProductivity] = useState(null);
     const [deadlines, setDeadlines] = useState({
         upcoming: [],
         overdue: [],
@@ -268,8 +434,56 @@ export default function Analytics() {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
-    const canViewTeamProductivity =
+    const canViewTeamAnalytics =
         user.role === 'admin' || user.role === 'manager';
+
+    const loadTeamReport = useCallback(
+        async ({ teamId, memberId = '', preserveMembers = false }) => {
+            if (!teamId) {
+                setTeamMembers([]);
+                setTeamReport(null);
+                setTaskSummary(null);
+                setDeadlines({
+                    upcoming: [],
+                    overdue: [],
+                    range_days: DEFAULT_DEADLINE_DAYS,
+                });
+
+                return;
+            }
+
+            const response = await getTeamReport(
+                teamId,
+                memberId
+                    ? {
+                          member_ids: memberId,
+                      }
+                    : {},
+            );
+
+            const report = response.data ?? null;
+            const normalizedMembers = normalizeReportMembers(
+                report?.members ?? [],
+            );
+
+            if (!preserveMembers) {
+                setTeamMembers(normalizedMembers);
+            }
+
+            setTeamReport(report);
+            setTaskSummary(report?.summary ?? null);
+            setDeadlines(
+                report?.deadlines ?? {
+                    upcoming: [],
+                    overdue: [],
+                    range_days: DEFAULT_DEADLINE_DAYS,
+                },
+            );
+
+            return report;
+        },
+        [],
+    );
 
     const loadAnalytics = useCallback(
         async ({ teamId = '', refresh = false } = {}) => {
@@ -282,34 +496,31 @@ export default function Analytics() {
             setErrorMessage('');
 
             try {
-                const filters = teamId
-                    ? {
-                          team_id: teamId,
-                      }
-                    : {};
+                /*
+                 * Admins and managers use one unified endpoint.
+                 * This prevents duplicate Laravel task queries and timeouts.
+                 */
+                if (canViewTeamAnalytics) {
+                    await loadTeamReport({
+                        teamId,
+                    });
 
-                const requests = [
-                    getTaskSummary(filters),
-                    getUpcomingDeadlines({
-                        ...filters,
-                        days: DEFAULT_DEADLINE_DAYS,
-                    }),
-                ];
-
-                if (canViewTeamProductivity && teamId) {
-                    requests.push(getTeamProductivity(teamId));
+                    return;
                 }
 
-                const [
-                    summaryResponse,
-                    deadlineResponse,
-                    productivityResponse,
-                ] = await Promise.all(requests);
+                /*
+                 * Team members retain their personal analytics endpoints.
+                 */
+                const [summaryResponse, deadlineResponse] = await Promise.all([
+                    getTaskSummary({}),
+                    getUpcomingDeadlines({
+                        days: DEFAULT_DEADLINE_DAYS,
+                    }),
+                ]);
 
                 setTaskSummary(summaryResponse.data);
                 setDeadlines(deadlineResponse.data);
-
-                setTeamProductivity(productivityResponse?.data ?? null);
+                setTeamReport(null);
             } catch (error) {
                 setErrorMessage(getErrorMessage(error));
             } finally {
@@ -317,27 +528,52 @@ export default function Analytics() {
                 setIsRefreshing(false);
             }
         },
-        [canViewTeamProductivity],
+        [canViewTeamAnalytics, loadTeamReport],
     );
 
     useEffect(() => {
         const initializationId = window.setTimeout(async () => {
             try {
-                let initialTeamId = '';
+                if (!canViewTeamAnalytics) {
+                    await loadAnalytics();
 
-                if (canViewTeamProductivity) {
-                    const teamResponse = await listTeams({
-                        page: 1,
-                        per_page: 100,
-                    });
-
-                    const availableTeams = teamResponse.data ?? [];
-
-                    setTeams(availableTeams);
-
-                    initialTeamId = availableTeams[0]?.id ?? '';
-                    setSelectedTeamId(initialTeamId);
+                    return;
                 }
+
+                /*
+                 * Load teams independently because this request controls
+                 * the team selector and the initial analytics scope.
+                 *
+                 * Team highlights are supplemental and must not prevent
+                 * the rest of the analytics page from loading.
+                 */
+                const teamResponse = await listTeams({
+                    page: 1,
+                    per_page: 100,
+                });
+
+                const availableTeams = teamResponse.data ?? [];
+
+                setTeams(availableTeams);
+
+                const initialTeamId = availableTeams[0]?.id ?? '';
+
+                setSelectedTeamId(initialTeamId);
+                setSelectedMemberId('');
+
+                /*
+                 * Do not await this request. A timeout or backend failure
+                 * must not discard the successfully loaded team list.
+                 */
+                void getTeamHighlights()
+                    .then((highlightResponse) => {
+                        setTeamHighlights(highlightResponse.data?.teams ?? []);
+                    })
+                    .catch((error) => {
+                        console.error('Unable to load team highlights.', error);
+
+                        setTeamHighlights([]);
+                    });
 
                 await loadAnalytics({
                     teamId: initialTeamId,
@@ -351,7 +587,7 @@ export default function Analytics() {
         return () => {
             window.clearTimeout(initializationId);
         };
-    }, [canViewTeamProductivity, loadAnalytics]);
+    }, [canViewTeamAnalytics, loadAnalytics]);
 
     const selectedTeam = useMemo(
         () => teams.find((team) => team.id === selectedTeamId) ?? null,
@@ -362,10 +598,66 @@ export default function Analytics() {
         const teamId = event.target.value;
 
         setSelectedTeamId(teamId);
+        setSelectedMemberId('');
+        setTeamMembers([]);
+        setTeamReport(null);
 
-        await loadAnalytics({
-            teamId,
-        });
+        if (!teamId) {
+            return;
+        }
+
+        setIsRefreshing(true);
+        setErrorMessage('');
+
+        try {
+            await loadAnalytics({
+                teamId,
+            });
+        } catch (error) {
+            setErrorMessage(getErrorMessage(error));
+        } finally {
+            setIsRefreshing(false);
+        }
+    }
+
+    async function handleMemberChange(event) {
+        const memberId = event.target.value;
+
+        setSelectedMemberId(memberId);
+        setIsRefreshing(true);
+        setErrorMessage('');
+
+        try {
+            await loadTeamReport({
+                teamId: selectedTeamId,
+                memberId,
+                preserveMembers: true,
+            });
+        } catch (error) {
+            setErrorMessage(getErrorMessage(error));
+        } finally {
+            setIsRefreshing(false);
+        }
+    }
+
+    async function handleTeamRowSelection(teamId) {
+        setSelectedTeamId(teamId);
+        setSelectedMemberId('');
+        setTeamMembers([]);
+        setTeamReport(null);
+
+        setIsRefreshing(true);
+        setErrorMessage('');
+
+        try {
+            await loadAnalytics({
+                teamId,
+            });
+        } catch (error) {
+            setErrorMessage(getErrorMessage(error));
+        } finally {
+            setIsRefreshing(false);
+        }
     }
 
     if (isLoading) {
@@ -391,17 +683,14 @@ export default function Analytics() {
         );
     }
 
-    const summary = teamProductivity?.summary ?? taskSummary ?? {};
-    const priorityCounts = taskSummary?.priority ?? {
+    const summary = taskSummary ?? {};
+    const priorityCounts = summary.priority ?? {
         low: 0,
         medium: 0,
         high: 0,
     };
 
-    const priorityDurations =
-        summary.average_completion_days_by_priority ??
-        taskSummary?.average_completion_days_by_priority ??
-        {};
+    const priorityDurations = summary.average_completion_days_by_priority ?? {};
 
     return (
         <section className="analytics-page">
@@ -411,30 +700,60 @@ export default function Analytics() {
                 description="Review task workload, priorities, completion speed, team productivity, and approaching deadlines."
                 actions={
                     <div className="analytics-header-actions">
-                        {canViewTeamProductivity ? (
-                            <label className="analytics-team-filter">
-                                <span>Team</span>
+                        {canViewTeamAnalytics ? (
+                            <>
+                                <label className="analytics-team-filter">
+                                    <span>Team</span>
 
-                                <select
-                                    value={selectedTeamId}
-                                    onChange={handleTeamChange}
-                                    disabled={
-                                        isRefreshing || teams.length === 0
-                                    }
-                                >
-                                    {teams.length === 0 ? (
-                                        <option value="">
-                                            No available teams
-                                        </option>
-                                    ) : null}
+                                    <select
+                                        value={selectedTeamId}
+                                        onChange={handleTeamChange}
+                                        disabled={
+                                            isRefreshing || teams.length === 0
+                                        }
+                                    >
+                                        {teams.length === 0 ? (
+                                            <option value="">
+                                                No available teams
+                                            </option>
+                                        ) : null}
 
-                                    {teams.map((team) => (
-                                        <option key={team.id} value={team.id}>
-                                            {team.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
+                                        {teams.map((team) => (
+                                            <option
+                                                key={team.id}
+                                                value={team.id}
+                                            >
+                                                {team.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                <label className="analytics-team-filter">
+                                    <span>Member</span>
+
+                                    <select
+                                        value={selectedMemberId}
+                                        onChange={handleMemberChange}
+                                        disabled={
+                                            isRefreshing ||
+                                            !selectedTeamId ||
+                                            teamMembers.length === 0
+                                        }
+                                    >
+                                        <option value="">All members</option>
+
+                                        {teamMembers.map((member) => (
+                                            <option
+                                                key={member.user_id}
+                                                value={member.user_id}
+                                            >
+                                                {member.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                            </>
                         ) : null}
 
                         <button
@@ -466,6 +785,30 @@ export default function Analytics() {
                     <strong>{selectedTeam.name}</strong>
                 </div>
             ) : null}
+
+            <section className="analytics-section">
+                <header className="analytics-section-header">
+                    <div>
+                        <p className="analytics-section-eyebrow">
+                            Team highlights
+                        </p>
+
+                        <h2>Team workload, priority, and risk summary</h2>
+
+                        <p>
+                            Compare every authorized team by task status,
+                            priority, high-priority risk, and completion
+                            performance.
+                        </p>
+                    </div>
+                </header>
+
+                <TeamHighlightsTable
+                    teams={teamHighlights}
+                    selectedTeamId={selectedTeamId}
+                    onSelectTeam={handleTeamRowSelection}
+                />
+            </section>
 
             <div className="stat-grid analytics-stat-grid">
                 <StatCard
@@ -550,7 +893,7 @@ export default function Analytics() {
                 </div>
             </section>
 
-            {canViewTeamProductivity && selectedTeamId ? (
+            {canViewTeamAnalytics && selectedTeamId ? (
                 <section className="analytics-section">
                     <header className="analytics-section-header">
                         <div>
@@ -567,7 +910,9 @@ export default function Analytics() {
                     </header>
 
                     <MemberProductivityTable
-                        members={teamProductivity?.members ?? []}
+                        members={normalizeReportMembers(
+                            teamReport?.members ?? [],
+                        )}
                     />
                 </section>
             ) : null}

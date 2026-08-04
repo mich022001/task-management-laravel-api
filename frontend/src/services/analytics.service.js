@@ -23,3 +23,29 @@ export async function getUpcomingDeadlines(parameters = {}) {
 
     return response.data;
 }
+
+export async function getTeamHighlights() {
+    const response = await nodeClient.get('/analytics/teams/summary');
+
+    return response.data;
+}
+
+export async function getTeamReport(teamId, parameters = {}) {
+    const response = await nodeClient.get(`/analytics/teams/${teamId}/report`, {
+        params: parameters,
+    });
+
+    return response.data;
+}
+
+export async function downloadTeamReport(format, parameters) {
+    const response = await nodeClient.get(`/export/team-report/${format}`, {
+        params: parameters,
+        responseType: 'blob',
+    });
+
+    return {
+        blob: response.data,
+        contentDisposition: response.headers['content-disposition'] ?? '',
+    };
+}

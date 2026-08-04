@@ -5608,3 +5608,96 @@ body {
         width: 100%;
     }
 }
+
+.analytics-team-summary-table {
+    width: 100%;
+    min-width: 1680px;
+    table-layout: fixed;
+}
+
+.analytics-team-summary-table col.analytics-col-team {
+    width: 220px;
+}
+
+.analytics-team-summary-table col.analytics-col-members,
+.analytics-team-summary-table col.analytics-col-total {
+    width: 82px;
+}
+
+.analytics-team-summary-table col.analytics-col-status {
+    width: 92px;
+}
+
+.analytics-team-summary-table col.analytics-col-priority {
+    width: 82px;
+}
+
+.analytics-team-summary-table col.analytics-col-risk {
+    width: 96px;
+}
+
+.analytics-team-summary-table col.analytics-col-completion {
+    width: 105px;
+}
+
+.analytics-team-summary-table col.analytics-col-average {
+    width: 125px;
+}
+
+.analytics-team-summary-table thead tr:first-child th {
+    height: 44px;
+    padding: 10px 8px;
+    text-align: center;
+    background: #e9eef7;
+    border-bottom: 1px solid #d5deeb;
+    white-space: nowrap;
+}
+
+.analytics-team-summary-table thead tr:nth-child(2) th {
+    height: 54px;
+    padding: 8px 5px;
+    font-size: 0.68rem;
+    line-height: 1.25;
+    text-align: center;
+    vertical-align: middle;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
+.analytics-team-summary-table tbody td {
+    padding: 16px 8px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.analytics-team-summary-table tbody td:first-child {
+    padding-left: 16px;
+    text-align: left;
+}
+
+.analytics-team-summary-table tbody tr {
+    cursor: pointer;
+    transition:
+        background-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.analytics-team-summary-table tbody tr:hover {
+    background: #f5f8ff;
+}
+
+.analytics-team-summary-table .analytics-selected-row {
+    background: #eef4ff;
+    box-shadow: inset 3px 0 0 #2563eb;
+}
+
+.analytics-team-summary-table th,
+.analytics-team-summary-table td {
+    overflow: hidden;
+}
+
+.analytics-table-container {
+    overflow-x: auto;
+    scrollbar-gutter: stable;
+}
