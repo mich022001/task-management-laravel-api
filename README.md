@@ -116,11 +116,11 @@ npm run dev
 
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | 02michael2001@gmail.com | password123 |
 | Admin | valenzuelamichaelb6282@gmail.com | Password@123 |
 | Manager | 1002michael.v@gmail.com | password123 |
-| Team Lead | 0102michael.v@gmail.com | password123 |
+| Manager | 0102michael.v@gmail.com | password123 |
 | Member | valenzueladyesibel@gmail.com | password123 |
+| Member | 02michael2001@gmail.com | password123 |
 
 ---
 
