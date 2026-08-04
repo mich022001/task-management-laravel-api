@@ -49,7 +49,7 @@ describe('Role-aware navigation', () => {
         ).toBeInTheDocument();
     });
 
-    test('manager sees the Users link', () => {
+    test('manager does not see the Users link', () => {
         renderNavigation({
             id: '22222222-2222-4222-8222-222222222222',
             role: 'manager',
@@ -63,8 +63,6 @@ describe('Role-aware navigation', () => {
 
         expect(screen.getByRole('link', { name: 'Teams' })).toBeInTheDocument();
 
-        expect(screen.getByRole('link', { name: 'Users' })).toBeInTheDocument();
-
         expect(
             screen.getByRole('link', { name: 'Analytics' }),
         ).toBeInTheDocument();
@@ -72,9 +70,13 @@ describe('Role-aware navigation', () => {
         expect(
             screen.getByRole('link', { name: 'Settings' }),
         ).toBeInTheDocument();
+
+        expect(
+            screen.queryByRole('link', { name: 'Users' }),
+        ).not.toBeInTheDocument();
     });
 
-    test('team member sees only Dashboard and Tasks', () => {
+    test('team member sees only permitted navigation items', () => {
         renderNavigation({
             id: '33333333-3333-4333-8333-333333333333',
             role: 'team_member',

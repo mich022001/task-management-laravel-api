@@ -26,7 +26,7 @@ const navigationItems = [
         label: 'Users',
         to: '/users',
         icon: 'users',
-        roles: ['admin', 'manager'],
+        roles: ['admin'],
     },
     {
         label: 'Analytics',
