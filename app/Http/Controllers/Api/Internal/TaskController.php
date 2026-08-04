@@ -17,12 +17,19 @@ class TaskController extends Controller
             100,
         );
 
+        $relations = [
+            'team.creator',
+            'assignee',
+            'creator',
+        ];
+
+        if ($request->boolean('include_report_context')) {
+            $relations[] = 'statusHistories.changedBy';
+            $relations[] = 'activityLogs.actor';
+        }
+
         $tasks = Task::query()
-            ->with([
-                'team.creator',
-                'assignee',
-                'creator',
-            ])
+            ->with($relations)
             ->when(
                 $request->filled('status'),
                 fn ($query) => $query->where(
