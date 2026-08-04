@@ -5,12 +5,13 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { AuthContext } from '../../context/auth-context.js';
 import Dashboard from '../Dashboard.jsx';
 
-const getTaskSummaryMock = vi.fn();
+const getDashboardAnalyticsMock = vi.fn();
 const downloadTasksMock = vi.fn();
 const getExportOptionsMock = vi.fn();
 
 vi.mock('../../services/analytics.service.js', () => ({
-    getTaskSummary: (...arguments_) => getTaskSummaryMock(...arguments_),
+    getDashboardAnalytics: (...arguments_) =>
+        getDashboardAnalyticsMock(...arguments_),
 }));
 
 vi.mock('../../services/export.service.js', () => ({
@@ -58,8 +59,69 @@ describe('Dashboard page', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        getTaskSummaryMock.mockResolvedValue({
-            data: createSummary(),
+        getDashboardAnalyticsMock.mockResolvedValue({
+            data: {
+                summary: {
+                    ...createSummary(),
+                    priority: {
+                        low: 2,
+                        medium: 3,
+                        high: 3,
+                    },
+                },
+                deadlines: {
+                    range_days: 7,
+                    overdue: [
+                        {
+                            id: 'task-overdue',
+                            title: 'Resolve production issue',
+                            status: 'in_progress',
+                            priority: 'high',
+                            due_date: '2026-08-03T00:00:00.000Z',
+                        },
+                    ],
+                    upcoming: [
+                        {
+                            id: 'task-upcoming',
+                            title: 'Complete dashboard',
+                            status: 'pending',
+                            priority: 'medium',
+                            due_date: '2026-08-07T00:00:00.000Z',
+                        },
+                    ],
+                },
+                team_highlights: {
+                    teams: [
+                        {
+                            team_id: 'team-1',
+                            team_name: 'Engineering',
+                            member_count: 4,
+                            total_tasks: 8,
+                            status: {
+                                yet_to_start: 2,
+                                in_progress: 3,
+                                completed: 3,
+                                cancelled: 0,
+                            },
+                            overdue_tasks: 1,
+                            priority: {
+                                low: 2,
+                                medium: 3,
+                                high: 3,
+                            },
+                            completion_rate: 37.5,
+                        },
+                    ],
+                    totals: {
+                        teams: 1,
+                        members: 4,
+                        tasks: 8,
+                        overdue: 1,
+                        high_priority: 3,
+                        high_priority_overdue: 1,
+                    },
+                },
+            },
         });
 
         getExportOptionsMock.mockResolvedValue({
@@ -112,11 +174,11 @@ describe('Dashboard page', () => {
         expect(await screen.findByText('Total Tasks')).toBeInTheDocument();
         expect(screen.getByText('8')).toBeInTheDocument();
 
-        expect(getTaskSummaryMock).toHaveBeenCalledTimes(1);
+        expect(getDashboardAnalyticsMock).toHaveBeenCalledTimes(1);
     });
 
     test('displays an analytics API error', async () => {
-        getTaskSummaryMock.mockRejectedValue({
+        getDashboardAnalyticsMock.mockRejectedValue({
             response: {
                 data: {
                     message: 'Analytics service unavailable.',
@@ -134,12 +196,37 @@ describe('Dashboard page', () => {
     test('retries after an analytics failure', async () => {
         const user = userEvent.setup();
 
-        getTaskSummaryMock
+        getDashboardAnalyticsMock
             .mockRejectedValueOnce(new Error('Unavailable'))
             .mockResolvedValueOnce({
-                data: createSummary({
-                    total_tasks: 1,
-                }),
+                data: {
+                    summary: {
+                        ...createSummary({
+                            total_tasks: 1,
+                        }),
+                        priority: {
+                            low: 0,
+                            medium: 0,
+                            high: 1,
+                        },
+                    },
+                    deadlines: {
+                        range_days: 7,
+                        overdue: [],
+                        upcoming: [],
+                    },
+                    team_highlights: {
+                        teams: [],
+                        totals: {
+                            teams: 0,
+                            members: 0,
+                            tasks: 0,
+                            overdue: 0,
+                            high_priority: 0,
+                            high_priority_overdue: 0,
+                        },
+                    },
+                },
             });
 
         renderDashboard('admin');
@@ -151,7 +238,7 @@ describe('Dashboard page', () => {
         await user.click(retryButton);
 
         await waitFor(() => {
-            expect(getTaskSummaryMock).toHaveBeenCalledTimes(2);
+            expect(getDashboardAnalyticsMock).toHaveBeenCalledTimes(2);
         });
 
         expect(await screen.findByText('Total Tasks')).toBeInTheDocument();

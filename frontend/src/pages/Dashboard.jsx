@@ -3,11 +3,12 @@ import { useCallback, useEffect, useState } from 'react';
 import ErrorState from '../components/common/ErrorState.jsx';
 import Loading from '../components/common/Loading.jsx';
 import DashboardCards from '../components/dashboard/DashboardCards.jsx';
+import DashboardOverview from '../components/dashboard/DashboardOverview.jsx';
 import TaskExportModal from '../components/exports/TaskExportModal.jsx';
 import Icon from '../components/ui/Icon.jsx';
 import PageHeader from '../components/ui/PageHeader.jsx';
 import { useAuth } from '../hooks/useAuth.js';
-import { getTaskSummary } from '../services/analytics.service.js';
+import { getDashboardAnalytics } from '../services/analytics.service.js';
 import { downloadTasks, getExportOptions } from '../services/export.service.js';
 
 function getApiErrorMessage(error) {
@@ -52,7 +53,7 @@ function triggerBrowserDownload(blob, filename) {
 export default function Dashboard() {
     const { user } = useAuth();
 
-    const [summary, setSummary] = useState(null);
+    const [dashboardAnalytics, setDashboardAnalytics] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -68,16 +69,18 @@ export default function Dashboard() {
         user?.role,
     );
 
-    const retryLoadSummary = useCallback(async () => {
+    const retryLoadDashboard = useCallback(async () => {
         setIsLoading(true);
         setErrorMessage('');
 
         try {
-            const response = await getTaskSummary();
+            const response = await getDashboardAnalytics({
+                days: 7,
+            });
 
-            setSummary(response.data);
+            setDashboardAnalytics(response.data);
         } catch (error) {
-            setSummary(null);
+            setDashboardAnalytics(null);
             setErrorMessage(getApiErrorMessage(error));
         } finally {
             setIsLoading(false);
@@ -87,13 +90,15 @@ export default function Dashboard() {
     useEffect(() => {
         let isCancelled = false;
 
-        getTaskSummary()
+        getDashboardAnalytics({
+            days: 7,
+        })
             .then((response) => {
                 if (isCancelled) {
                     return;
                 }
 
-                setSummary(response.data);
+                setDashboardAnalytics(response.data);
                 setErrorMessage('');
             })
             .catch((error) => {
@@ -101,7 +106,7 @@ export default function Dashboard() {
                     return;
                 }
 
-                setSummary(null);
+                setDashboardAnalytics(null);
                 setErrorMessage(getApiErrorMessage(error));
             })
             .finally(() => {
@@ -200,11 +205,22 @@ export default function Dashboard() {
             ) : null}
 
             {!isLoading && errorMessage ? (
-                <ErrorState message={errorMessage} onRetry={retryLoadSummary} />
+                <ErrorState
+                    message={errorMessage}
+                    onRetry={retryLoadDashboard}
+                />
             ) : null}
 
-            {!isLoading && !errorMessage && summary ? (
-                <DashboardCards summary={summary} />
+            {!isLoading && !errorMessage && dashboardAnalytics ? (
+                <>
+                    <DashboardCards summary={dashboardAnalytics.summary} />
+
+                    <DashboardOverview
+                        summary={dashboardAnalytics.summary}
+                        deadlines={dashboardAnalytics.deadlines}
+                        teamHighlights={dashboardAnalytics.team_highlights}
+                    />
+                </>
             ) : null}
 
             <TaskExportModal

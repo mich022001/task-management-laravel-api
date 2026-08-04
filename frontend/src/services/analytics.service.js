@@ -1,5 +1,13 @@
 import nodeClient from '../api/nodeClient.js';
 
+export async function getDashboardAnalytics(parameters = {}) {
+    const response = await nodeClient.get('/analytics/dashboard', {
+        params: parameters,
+    });
+
+    return response.data;
+}
+
 export async function getTaskSummary(parameters = {}) {
     const response = await nodeClient.get('/analytics/tasks/summary', {
         params: parameters,
