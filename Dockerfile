@@ -1,4 +1,4 @@
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 RUN apt-get update && apt-get install -y \
     nginx \
@@ -6,7 +6,11 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libpq-dev \
     libzip-dev \
-    && docker-php-ext-install pdo_pgsql zip \
+    libonig-dev \
+    && docker-php-ext-install \
+        mbstring \
+        pdo_pgsql \
+        zip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
