@@ -18,6 +18,7 @@ class TeamController extends Controller
         );
 
         $userUuid = $request->string('user_id')->toString();
+        $managedByUuid = $request->string('managed_by')->toString();
 
         $teams = Team::query()
             ->when(
@@ -37,6 +38,31 @@ class TeamController extends Controller
                                 'users.uuid',
                                 $userUuid,
                             ),
+                        ),
+                ),
+            )
+            ->when(
+                $managedByUuid !== '',
+                fn ($query) => $query->where(
+                    fn ($teamQuery) => $teamQuery
+                        ->whereHas(
+                            'creator',
+                            fn ($creatorQuery) => $creatorQuery->where(
+                                'uuid',
+                                $managedByUuid,
+                            ),
+                        )
+                        ->orWhereHas(
+                            'members',
+                            fn ($memberQuery) => $memberQuery
+                                ->where(
+                                    'users.uuid',
+                                    $managedByUuid,
+                                )
+                                ->where(
+                                    'team_members.member_role',
+                                    'lead',
+                                ),
                         ),
                 ),
             )

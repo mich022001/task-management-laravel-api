@@ -17,12 +17,19 @@ class TaskController extends Controller
             100,
         );
 
+        $relations = [
+            'team.creator',
+            'assignee',
+            'creator',
+        ];
+
+        if ($request->boolean('include_report_context')) {
+            $relations[] = 'statusHistories.changedBy';
+            $relations[] = 'activityLogs.actor';
+        }
+
         $tasks = Task::query()
-            ->with([
-                'team.creator',
-                'assignee',
-                'creator',
-            ])
+            ->with($relations)
             ->when(
                 $request->filled('status'),
                 fn ($query) => $query->where(
@@ -55,6 +62,22 @@ class TaskController extends Controller
                         'uuid',
                         $request->string('assigned_to')->toString(),
                     ),
+                ),
+            )
+            ->when(
+                $request->filled('date_from'),
+                fn ($query) => $query->whereDate(
+                    'created_at',
+                    '>=',
+                    $request->string('date_from')->toString(),
+                ),
+            )
+            ->when(
+                $request->filled('date_to'),
+                fn ($query) => $query->whereDate(
+                    'created_at',
+                    '<=',
+                    $request->string('date_to')->toString(),
                 ),
             )
             ->latest()
