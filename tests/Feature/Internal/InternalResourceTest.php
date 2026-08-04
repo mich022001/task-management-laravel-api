@@ -102,6 +102,60 @@ class InternalResourceTest extends TestCase
             ]);
     }
 
+    public function test_internal_teams_endpoint_filters_managed_teams(): void
+    {
+        $manager = User::factory()->manager()->create();
+        $otherManager = User::factory()->manager()->create();
+
+        $createdTeam = Team::factory()->create([
+            'created_by' => $manager->id,
+        ]);
+
+        $leadTeam = Team::factory()->create([
+            'created_by' => $otherManager->id,
+        ]);
+
+        $leadTeam->members()->attach($manager->id, [
+            'member_role' => 'lead',
+        ]);
+
+        $regularMemberTeam = Team::factory()->create([
+            'created_by' => $otherManager->id,
+        ]);
+
+        $regularMemberTeam->members()->attach($manager->id, [
+            'member_role' => 'member',
+        ]);
+
+        $unrelatedTeam = Team::factory()->create([
+            'created_by' => $otherManager->id,
+        ]);
+
+        $response = $this
+            ->withHeader('X-Service-Key', $this->serviceKey)
+            ->getJson(
+                '/api/v1/internal/teams'
+                ."?managed_by={$manager->uuid}"
+                .'&per_page=100',
+            );
+
+        $response
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonFragment([
+                'id' => $createdTeam->uuid,
+            ])
+            ->assertJsonFragment([
+                'id' => $leadTeam->uuid,
+            ])
+            ->assertJsonMissing([
+                'id' => $regularMemberTeam->uuid,
+            ])
+            ->assertJsonMissing([
+                'id' => $unrelatedTeam->uuid,
+            ]);
+    }
+
     public function test_internal_tasks_endpoint_supports_filters(): void
     {
         $manager = User::factory()->manager()->create();
@@ -176,6 +230,46 @@ class InternalResourceTest extends TestCase
             ->assertJsonPath(
                 'data.0.assigned_to',
                 $assignedMember->uuid,
+            );
+    }
+
+    public function test_internal_tasks_endpoint_supports_created_date_range(): void
+    {
+        $team = Team::factory()->create();
+
+        $insideRange = Task::factory()->create([
+            'team_id' => $team->id,
+            'created_at' => '2026-08-10 08:00:00',
+        ]);
+
+        Task::factory()->create([
+            'team_id' => $team->id,
+            'created_at' => '2026-07-20 08:00:00',
+        ]);
+
+        Task::factory()->create([
+            'team_id' => $team->id,
+            'created_at' => '2026-09-10 08:00:00',
+        ]);
+
+        $response = $this
+            ->withHeader(
+                'X-Service-Key',
+                $this->serviceKey,
+            )
+            ->getJson(
+                '/api/v1/internal/tasks'
+                .'?date_from=2026-08-01'
+                .'&date_to=2026-08-31'
+                .'&per_page=100',
+            );
+
+        $response
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath(
+                'data.0.id',
+                $insideRange->uuid,
             );
     }
 

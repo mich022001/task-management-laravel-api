@@ -5701,3 +5701,439 @@ body {
     overflow-x: auto;
     scrollbar-gutter: stable;
 }
+
+/* Task export modal */
+
+.dashboard-export-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.export-modal-backdrop {
+    position: fixed;
+    z-index: 1200;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    overflow-y: auto;
+    background: rgb(15 23 42 / 58%);
+    backdrop-filter: blur(4px);
+}
+
+.export-modal {
+    width: min(100%, 760px);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    background: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 20px;
+    box-shadow:
+        0 28px 70px rgb(15 23 42 / 24%),
+        0 8px 24px rgb(15 23 42 / 12%);
+}
+
+.export-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 26px 28px 22px;
+    border-bottom: 1px solid var(--color-slate-200);
+}
+
+.export-modal-header h2,
+.export-modal-header p {
+    margin: 0;
+}
+
+.export-modal-header h2 {
+    color: var(--color-slate-900);
+    font-size: 1.4rem;
+}
+
+.export-modal-header > div > p:last-child {
+    margin-top: 8px;
+    color: var(--color-slate-500);
+    font-size: 0.88rem;
+    line-height: 1.55;
+}
+
+.export-modal-close {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    padding: 0;
+    color: var(--color-slate-600);
+    background: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 10px;
+}
+
+.export-modal-close:hover:not(:disabled) {
+    color: var(--color-slate-900);
+    background: var(--color-slate-100);
+}
+
+.export-form {
+    display: grid;
+    gap: 24px;
+    padding: 26px 28px 28px;
+}
+
+.export-format-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding: 0;
+    border: 0;
+}
+
+.export-format-group legend {
+    grid-column: 1 / -1;
+    margin-bottom: 2px;
+    color: var(--color-slate-700);
+    font-size: 0.82rem;
+    font-weight: 750;
+}
+
+.export-format-option {
+    min-width: 0;
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 15px;
+    cursor: pointer;
+    background: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 12px;
+}
+
+.export-format-option:has(input:checked) {
+    background: var(--color-primary-50);
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 10%);
+}
+
+.export-format-option input {
+    margin-top: 3px;
+}
+
+.export-format-option span {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.export-format-option strong {
+    color: var(--color-slate-800);
+    font-size: 0.88rem;
+}
+
+.export-format-option small {
+    color: var(--color-slate-500);
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.export-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.export-filter-grid input,
+.export-filter-grid select {
+    width: 100%;
+}
+
+.export-form-message,
+.export-form-error {
+    margin: 0;
+    padding: 11px 13px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.export-form-message {
+    color: var(--color-slate-600);
+    background: var(--color-slate-100);
+}
+
+.export-form-error {
+    color: #9d2929;
+    background: var(--color-danger-soft);
+    border: 1px solid #f4cccc;
+}
+
+.export-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 4px;
+}
+
+@media (max-width: 680px) {
+    .export-modal-backdrop {
+        align-items: end;
+        padding: 0;
+    }
+
+    .export-modal {
+        max-height: 92vh;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .export-modal-header,
+    .export-form {
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+
+    .export-format-group,
+    .export-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .export-modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .export-modal-actions button {
+        width: 100%;
+    }
+}
+
+/* Task export modal */
+
+.dashboard-export-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.export-modal-backdrop {
+    position: fixed;
+    z-index: 1200;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    overflow-y: auto;
+    background: rgb(15 23 42 / 58%);
+    backdrop-filter: blur(4px);
+}
+
+.export-modal {
+    width: min(100%, 760px);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    background: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 20px;
+    box-shadow:
+        0 28px 70px rgb(15 23 42 / 24%),
+        0 8px 24px rgb(15 23 42 / 12%);
+}
+
+.export-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 26px 28px 22px;
+    border-bottom: 1px solid var(--color-slate-200);
+}
+
+.export-modal-header h2,
+.export-modal-header p {
+    margin: 0;
+}
+
+.export-modal-header h2 {
+    color: var(--color-slate-900);
+    font-size: 1.4rem;
+}
+
+.export-modal-header > div > p:last-child {
+    margin-top: 8px;
+    color: var(--color-slate-500);
+    font-size: 0.88rem;
+    line-height: 1.55;
+}
+
+.export-modal-close {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    padding: 0;
+    color: var(--color-slate-600);
+    background: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 10px;
+}
+
+.export-modal-close:hover:not(:disabled) {
+    color: var(--color-slate-900);
+    background: var(--color-slate-100);
+}
+
+.export-form {
+    display: grid;
+    gap: 24px;
+    padding: 26px 28px 28px;
+}
+
+.export-format-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding: 0;
+    border: 0;
+}
+
+.export-format-group legend {
+    grid-column: 1 / -1;
+    margin-bottom: 2px;
+    color: var(--color-slate-700);
+    font-size: 0.82rem;
+    font-weight: 750;
+}
+
+.export-format-option {
+    min-width: 0;
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 15px;
+    cursor: pointer;
+    background: white;
+    border: 1px solid var(--color-slate-200);
+    border-radius: 12px;
+}
+
+.export-format-option:has(input:checked) {
+    background: var(--color-primary-50);
+    border-color: var(--color-primary-500);
+    box-shadow: 0 0 0 3px rgb(59 130 246 / 10%);
+}
+
+.export-format-option input {
+    margin-top: 3px;
+}
+
+.export-format-option span {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.export-format-option strong {
+    color: var(--color-slate-800);
+    font-size: 0.88rem;
+}
+
+.export-format-option small {
+    color: var(--color-slate-500);
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.export-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.export-filter-grid input,
+.export-filter-grid select {
+    width: 100%;
+}
+
+.export-form-message,
+.export-form-error {
+    margin: 0;
+    padding: 11px 13px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.export-form-message {
+    color: var(--color-slate-600);
+    background: var(--color-slate-100);
+}
+
+.export-form-error {
+    color: #9d2929;
+    background: var(--color-danger-soft);
+    border: 1px solid #f4cccc;
+}
+
+.export-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 4px;
+}
+
+@media (max-width: 680px) {
+    .export-modal-backdrop {
+        align-items: end;
+        padding: 0;
+    }
+
+    .export-modal {
+        max-height: 92vh;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .export-modal-header,
+    .export-form {
+        padding-right: 18px;
+        padding-left: 18px;
+    }
+
+    .export-format-group,
+    .export-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .export-modal-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .export-modal-actions button {
+        width: 100%;
+    }
+}
+
+.export-scope-notice {
+    display: grid;
+    gap: 5px;
+    padding: 14px 16px;
+    color: var(--color-primary-700);
+    background: var(--color-primary-50);
+    border: 1px solid var(--color-primary-200);
+    border-radius: 12px;
+}
+
+.export-scope-notice strong {
+    font-size: 0.86rem;
+}
+
+.export-scope-notice span {
+    color: var(--color-slate-600);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}

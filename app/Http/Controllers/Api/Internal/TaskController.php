@@ -57,6 +57,22 @@ class TaskController extends Controller
                     ),
                 ),
             )
+            ->when(
+                $request->filled('date_from'),
+                fn ($query) => $query->whereDate(
+                    'created_at',
+                    '>=',
+                    $request->string('date_from')->toString(),
+                ),
+            )
+            ->when(
+                $request->filled('date_to'),
+                fn ($query) => $query->whereDate(
+                    'created_at',
+                    '<=',
+                    $request->string('date_to')->toString(),
+                ),
+            )
             ->latest()
             ->paginate($perPage);
 
